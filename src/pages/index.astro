@@ -1,17 +1,363 @@
 ---
+import { getCollection } from "astro:content";
+import Layout from "../layouts/Layout.astro";
 
+const projects = await getCollection("projects");
+projects.sort((a, b) => b.data.year - a.data.year);
+
+const interactiveProjects = projects.filter((p) => p.data.category === "Interactive");
+const designProjects = projects.filter((p) => p.data.category === "Design");
+
+const years = projects.map((p) => p.data.year);
+const yearMin = Math.min(...years);
+const yearMax = Math.max(...years);
+
+// Short one-line brief from the concept (trimmed at a word boundary)
+function brief(text: string, max = 110) {
+  if (text.length <= max) return text;
+  const cut = text.slice(0, max);
+  return cut.slice(0, cut.lastIndexOf(" ")).trim() + "…";
+}
 ---
 
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
-	</head>
-	<body>
-		<h1>Astro</h1>
-	</body>
-</html>
+<Layout
+  title="Cristian Dubineanschi — New Media Artist"
+  description="Portfolio of Cristian Dubineanschi — interactive installations, light systems and visual design translating invisible infrastructures into spatial, sensory experience."
+>
+  <!-- ============ LEAD ============ -->
+  <section class="lead container">
+    <div class="lead-top">
+      <span class="lead-tag">INDEX — {yearMin}/{String(yearMax).slice(2)}</span>
+      <span class="lead-tag">CLUJ-NAPOCA, RO</span>
+      <span class="lead-tag accent">● AVAILABLE FOR WORK</span>
+    </div>
+
+    <h1 class="lead-display">
+      <span class="ld-line line-mask" style="--reveal-delay: .08s"
+        ><span>Making the invisible</span></span
+      >
+      <span class="ld-line line-mask" style="--reveal-delay: .2s"
+        ><span><em>physical.</em></span></span
+      >
+    </h1>
+
+    <a class="lead-scroll" href="#works" data-magnetic data-magnetic-strength="0.35">
+      <span>↓ Index</span>
+    </a>
+  </section>
+
+  <!-- ============ WORKS INDEX ============ -->
+  <main id="works" class="works container">
+    <section class="windex">
+      <div class="windex-head reveal">
+        <h2 class="windex-label">Interactive Installations</h2>
+        <span class="windex-count">[{String(interactiveProjects.length).padStart(2, "0")}]</span>
+      </div>
+      <div class="windex-list">
+        {
+          interactiveProjects.map((project, i) => (
+            <a href={`/projects/${project.id}`} class="windex-row reveal" data-astro-prefetch>
+              <span class="wr-num">{String(i + 1).padStart(2, "0")}</span>
+              <span class="wr-main">
+                <span class="wr-title">
+                  {project.data.title}
+                  {project.id === "oracolul2000" && (
+                    <span class="title-collab">(collaboration)</span>
+                  )}
+                  {project.id === "rooted-structures" && (
+                    <span class="title-collab">(team project)</span>
+                  )}
+                </span>
+                <span class="wr-brief">{brief(project.data.concept)}</span>
+              </span>
+              <span class="wr-cat">{project.data.medium[0]}</span>
+              <span class="wr-year">{project.data.year}</span>
+              <span class="wr-arrow">↗</span>
+            </a>
+          ))
+        }
+      </div>
+    </section>
+
+    {
+      designProjects.length > 0 && (
+        <section class="windex">
+          <div class="windex-head reveal">
+            <h2 class="windex-label">Design &amp; Visual Systems</h2>
+            <span class="windex-count">[{String(designProjects.length).padStart(2, "0")}]</span>
+          </div>
+          <div class="windex-list">
+            {designProjects.map((project, i) => (
+              <a href={`/projects/${project.id}`} class="windex-row reveal" data-astro-prefetch>
+                <span class="wr-num">{String(i + 1).padStart(2, "0")}</span>
+                <span class="wr-main">
+                  <span class="wr-title">{project.data.title}</span>
+                  <span class="wr-brief">{brief(project.data.concept)}</span>
+                </span>
+                <span class="wr-cat">{project.data.medium[0]}</span>
+                <span class="wr-year">{project.data.year}</span>
+                <span class="wr-arrow">↗</span>
+              </a>
+            ))}
+          </div>
+        </section>
+      )
+    }
+  </main>
+</Layout>
+
+<style>
+  /* ============ LEAD ============ */
+  .lead {
+    min-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding-top: 5rem;
+    padding-bottom: 4rem;
+  }
+  .lead-top {
+    display: flex;
+    gap: 2rem;
+    flex-wrap: wrap;
+    padding-bottom: 1.4rem;
+    margin-bottom: 2.5rem;
+    border-bottom: 1px solid var(--color-border);
+  }
+  .lead-tag {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--color-muted);
+  }
+  .lead-tag.accent {
+    color: var(--color-accent);
+    margin-left: auto;
+  }
+
+  .lead-display {
+    margin: 0;
+    font-family: var(--font-sans);
+    font-weight: 400;
+    font-size: clamp(2.1rem, 5.5vw, 4.6rem);
+    line-height: 1.02;
+    letter-spacing: -0.025em;
+    text-transform: none;
+    color: var(--color-text);
+  }
+  .ld-line {
+    display: block;
+  }
+  .lead-display .line-mask,
+  .lead-display .line-mask > span {
+    font-family: var(--font-sans);
+    font-size: inherit;
+    font-weight: inherit;
+    line-height: 1.02;
+    letter-spacing: inherit;
+    color: inherit;
+  }
+  .lead-display em {
+    font-style: normal;
+    color: var(--color-accent);
+  }
+  .lead-display sup {
+    font-size: 0.28em;
+    vertical-align: super;
+    color: var(--color-muted);
+    font-weight: 400;
+  }
+
+  .lead-scroll {
+    display: inline-block;
+    margin-top: 3rem;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--color-text);
+    border-bottom: 1px solid var(--color-text);
+    padding-bottom: 4px;
+    white-space: nowrap;
+  }
+  .lead-scroll span {
+    font-size: inherit;
+    letter-spacing: inherit;
+    color: inherit;
+  }
+  .lead-scroll:hover {
+    color: var(--color-accent);
+    border-color: var(--color-accent);
+  }
+
+  /* ============ WORKS INDEX ============ */
+  .works {
+    padding-bottom: 8rem;
+  }
+  .windex {
+    margin-bottom: 5rem;
+  }
+  .windex:last-child {
+    margin-bottom: 0;
+  }
+
+  .windex-head {
+    display: flex;
+    align-items: baseline;
+    gap: 1rem;
+    margin-bottom: 0.5rem;
+  }
+  .windex-label {
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    font-weight: 400;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-muted);
+  }
+  .windex-count {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--color-accent);
+  }
+
+  .windex-row {
+    display: grid;
+    grid-template-columns: 3.5rem 1fr 14rem 5rem 2rem;
+    align-items: start;
+    gap: 1.5rem;
+    padding: 1.5rem 0.5rem;
+    border-top: 1px solid var(--color-border);
+    transition:
+      background-color 0.4s var(--ease-out-expo),
+      padding 0.4s var(--ease-out-expo);
+  }
+  .windex:last-child .windex-list .windex-row:last-child {
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .wr-num {
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    color: var(--color-muted);
+    padding-top: 0.4rem;
+    transition: color 0.35s ease;
+  }
+  .wr-main {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+  .wr-title {
+    font-family: var(--font-sans);
+    font-size: clamp(1.15rem, 2vw, 1.7rem);
+    font-weight: 400;
+    letter-spacing: -0.02em;
+    text-transform: uppercase;
+    color: var(--color-text);
+    line-height: 1.05;
+    transition:
+      transform 0.4s var(--ease-out-expo),
+      color 0.35s ease;
+  }
+  .title-collab {
+    font-size: 50%;
+    opacity: 0.4;
+    font-family: var(--font-mono);
+    font-weight: normal;
+    text-transform: uppercase;
+    margin-left: 0.6rem;
+    vertical-align: middle;
+    letter-spacing: 0.05em;
+  }
+  .wr-brief {
+    font-family: var(--font-body);
+    font-size: 0.92rem;
+    line-height: 1.5;
+    color: var(--color-muted-lavender);
+    max-width: 46em;
+    max-height: 0;
+    opacity: 0;
+    overflow: hidden;
+    transform: translateY(4px);
+    transition:
+      max-height 0.45s var(--ease-out-expo),
+      opacity 0.4s ease,
+      transform 0.45s var(--ease-out-expo),
+      margin-top 0.45s var(--ease-out-expo);
+  }
+  .wr-cat {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--color-muted);
+    padding-top: 0.5rem;
+    transition: color 0.35s ease;
+  }
+  .wr-year {
+    font-family: var(--font-mono);
+    font-size: 0.82rem;
+    color: var(--color-muted);
+    text-align: right;
+    padding-top: 0.45rem;
+    transition: color 0.35s ease;
+  }
+  .wr-arrow {
+    font-size: 1.1rem;
+    color: var(--color-muted);
+    text-align: right;
+    padding-top: 0.35rem;
+    transition:
+      color 0.35s ease,
+      transform 0.45s var(--ease-out-expo);
+  }
+
+  /* Hover: title shrinks, brief reveals beneath, accents engage */
+  .windex-row:hover {
+    background-color: var(--color-bg-soft);
+  }
+  .windex-row:hover .wr-num {
+    color: var(--color-accent);
+  }
+  .windex-row:hover .wr-title {
+    color: var(--color-accent);
+    transform: translateX(8px);
+  }
+  .windex-row:hover .wr-brief {
+    max-height: 6rem;
+    opacity: 1;
+    transform: none;
+    margin-top: 0.7rem;
+  }
+  .windex-row:hover .wr-arrow {
+    color: var(--color-accent);
+    transform: translate(4px, -4px);
+  }
+
+  /* ============ RESPONSIVE ============ */
+  @media (max-width: 860px) {
+    .windex-row {
+      grid-template-columns: 2.5rem 1fr 3.5rem;
+      gap: 0.75rem 1rem;
+      padding: 1.2rem 0.25rem;
+    }
+    .wr-cat {
+      display: none;
+    }
+    .wr-arrow {
+      display: none;
+    }
+    .lead-foot {
+      gap: 1.5rem;
+    }
+    /* No hover on touch — reveal the project brief inline instead. */
+    .wr-brief {
+      max-height: none;
+      opacity: 1;
+      transform: none;
+      margin-top: 0.6rem;
+    }
+  }
+</style>
