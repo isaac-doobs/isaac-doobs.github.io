@@ -1,0 +1,1366 @@
+---
+import { getCollection, render } from "astro:content";
+import { Code } from "astro:components";
+import Layout from "../../layouts/Layout.astro";
+
+export async function getStaticPaths() {
+  const projects = await getCollection("projects");
+  return projects.map((project) => ({
+    params: { id: project.id },
+    props: { project },
+  }));
+}
+
+const { project } = Astro.props;
+const d = project.data;
+const { Content } = await render(project);
+
+// Sequential section numbering — called in document order, skips absent sections
+let _n = 0;
+const sec = () => String(++_n).padStart(2, "0");
+
+const hasDocs = d.academicContext || d.challenges || d.researchRelevance;
+const statusClass = `status-${d.status.toLowerCase().replace(/\s+/g, "-")}`;
+
+// Use a real still for the social card (most thumbnails are video). Falls back
+// to the Layout default when no image asset is available.
+const ogImage = [d.thumbnailUrl, ...(d.mediaGallery ?? [])].find((u) =>
+  /\.(jpe?g|png|webp)$/i.test(u),
+);
+---
+
+<Layout
+  title={`${d.title} — Cristian Dubineanschi`}
+  description={`${d.category} project by Cristian Dubineanschi — ${d.title}.`}
+  image={ogImage}
+>
+  <!-- ============ HERO ============ -->
+  <section class="immersive-hero" id="hero-section">
+    <div class="hero-video-wrapper">
+      {
+        d.videoUrl.endsWith(".mp4") ? (
+          <video autoplay muted loop playsinline id="hero-player">
+            <source src={d.videoUrl} type="video/mp4" />
+          </video>
+        ) : (
+          <img src={d.videoUrl} id="hero-player" alt={d.title} />
+        )
+      }
+      <div class="hero-tint"></div>
+    </div>
+
+    <span class="hero-watermark" aria-hidden="true">{d.category}</span>
+
+    <div class="hero-content container">
+      <div class="hero-eyebrow-row reveal" style="--reveal-delay: .1s">
+        <span class="he-cat">{d.category}</span>
+        <span class="he-sep">/</span>
+        <span class="he-year">{d.year}</span>
+        <span class="he-sep">/</span>
+        <span class={`he-status ${statusClass}`}>● {d.status.toUpperCase()}</span>
+      </div>
+
+      <h1 class="hero-title">
+        <span class="line-mask" style="--reveal-delay: .2s">
+          <span data-edit-field="title">{d.title}</span>
+          {project.id === "oracolul2000" && <span class="title-collab">(collaboration)</span>}
+          {project.id === "rooted-structures" && <span class="title-collab">(team project)</span>}
+        </span>
+      </h1>
+
+      <div class="hero-meta-strip reveal" style="--reveal-delay: .5s">
+        {d.medium.map((m) => <span class="hm-tag">{m}</span>)}
+      </div>
+    </div>
+
+    <a href="#body" class="hero-scroll-cue" data-magnetic data-magnetic-strength="0.4">
+      <span>SCROLL</span><span class="hsc-arrow">↓</span>
+    </a>
+  </section>
+
+  <div class="spec-container container" id="body">
+    <!-- ============ CONCEPT + SPEC ============ -->
+    <section class="split-section">
+      <div class="split-left reveal">
+        <div class="block-header">
+          <span class="block-num">{sec()}</span><h2 class="block-title">Concept</h2>
+        </div>
+        <div class="concept-paragraph" data-edit-field="concept">{d.concept}</div>
+        <div class="markdown-extra"><Content /></div>
+      </div>
+
+      <div class="split-right reveal" style="--reveal-delay: .12s">
+        <div class="block-header">
+          <span class="block-num">{sec()}</span><h2 class="block-title">Specification</h2>
+        </div>
+        <dl class="spec-table">
+          <div class="spec-row"><dt>ID</dt><dd class="upper">{project.id}</dd></div>
+          <div class="spec-row"><dt>Year</dt><dd data-edit-field="year">{d.year}</dd></div>
+          <div class="spec-row">
+            <dt>Category</dt><dd data-edit-field="category">{d.category}</dd>
+          </div>
+          <div class="spec-row">
+            <dt>Status</dt><dd class={`upper ${statusClass}`} data-edit-field="status">
+              {d.status}
+            </dd>
+          </div>
+          <div class="spec-row">
+            <dt>Software</dt>
+            <dd class="tags">
+              <span class="tags-container">
+                {
+                  d.software.map((s) => (
+                    <span class="tag" data-edit-spec-tag="software">
+                      {s}
+                    </span>
+                  ))
+                }
+              </span>
+              <span class="add-tag-btn" data-add-tag-for="software" style="display: none;">+</span>
+            </dd>
+          </div>
+          <div class="spec-row">
+            <dt>Hardware</dt>
+            <dd class="tags">
+              <span class="tags-container">
+                {
+                  d.hardware.map((s) => (
+                    <span class="tag" data-edit-spec-tag="hardware">
+                      {s}
+                    </span>
+                  ))
+                }
+              </span>
+              <span class="add-tag-btn" data-add-tag-for="hardware" style="display: none;">+</span>
+            </dd>
+          </div>
+          <div class="spec-row">
+            <dt>Inputs</dt>
+            <dd class="tags">
+              <span class="tags-container">
+                {
+                  d.inputs.map((s) => (
+                    <span class="tag" data-edit-spec-tag="inputs">
+                      {s}
+                    </span>
+                  ))
+                }
+              </span>
+              <span class="add-tag-btn" data-add-tag-for="inputs" style="display: none;">+</span>
+            </dd>
+          </div>
+        </dl>
+      </div>
+    </section>
+
+    <!-- ============ SCHEMATIC + PROCESS ============ -->
+    {
+      d.blueprintUrl && d.process && d.process.length > 0 ? (
+        <section class="split-section">
+          <div class="split-left reveal">
+            <div class="block-header">
+              <>
+                <span class="block-num">{sec()}</span>
+                <h2 class="block-title">Schematic</h2>
+              </>
+            </div>
+            <figure class="blueprint-frame">
+              <div class="blueprint-media">
+                <img
+                  src={d.blueprintUrl}
+                  alt={d.blueprintCaption || "System schematic"}
+                  class="blueprint-img"
+                />
+              </div>
+              {d.blueprintCaption && (
+                <figcaption class="blueprint-caption font-mono">
+                  FIG. — {d.blueprintCaption}
+                </figcaption>
+              )}
+            </figure>
+          </div>
+
+          <div class="split-right reveal" style="--reveal-delay: .12s">
+            <div class="block-header">
+              <>
+                <span class="block-num">{sec()}</span>
+                <h2 class="block-title">Process</h2>
+              </>
+            </div>
+            <ol class="steps">
+              {d.process.map((step, i) => (
+                <li class="step">
+                  <span class="step-num">{String(i + 1).padStart(2, "0")}</span>
+                  <span class="step-rule" />
+                  <p class="step-body" data-edit-step-index={i}>
+                    {step}
+                  </p>
+                </li>
+              ))}
+            </ol>
+          </div>
+        </section>
+      ) : (
+        <>
+          {d.blueprintUrl && (
+            <section class="block-section reveal">
+              <div class="block-header">
+                <span class="block-num">{sec()}</span>
+                <h2 class="block-title">Schematic</h2>
+              </div>
+              <figure class="blueprint-frame">
+                <div class="blueprint-media">
+                  <img
+                    src={d.blueprintUrl}
+                    alt={d.blueprintCaption || "System schematic"}
+                    class="blueprint-img"
+                  />
+                </div>
+                {d.blueprintCaption && (
+                  <figcaption class="blueprint-caption font-mono">
+                    FIG. — {d.blueprintCaption}
+                  </figcaption>
+                )}
+              </figure>
+            </section>
+          )}
+
+          {d.process && d.process.length > 0 && (
+            <section class="block-section reveal">
+              <div class="block-header">
+                <span class="block-num">{sec()}</span>
+                <h2 class="block-title">Process</h2>
+              </div>
+              <ol class="steps">
+                {d.process.map((step, i) => (
+                  <li class="step">
+                    <span class="step-num">{String(i + 1).padStart(2, "0")}</span>
+                    <span class="step-rule" />
+                    <p class="step-body" data-edit-step-index={i}>
+                      {step}
+                    </p>
+                  </li>
+                ))}
+              </ol>
+            </section>
+          )}
+        </>
+      )
+    }
+
+    <!-- ============ DOCUMENTATION ============ -->
+    {
+      hasDocs && (
+        <section class="block-section reveal">
+          <div class="block-header">
+            <>
+              <span class="block-num">{sec()}</span>
+              <h2 class="block-title">Research &amp; Documentation</h2>
+            </>
+          </div>
+          <div class="docs-grid">
+            {d.academicContext && (
+              <div class="doc-block">
+                <h3 class="doc-label">Context</h3>
+                <p class="doc-text" data-edit-field="academicContext">
+                  {d.academicContext}
+                </p>
+              </div>
+            )}
+            {d.challenges && (
+              <div class="doc-block">
+                <h3 class="doc-label">Challenges &amp; Solutions</h3>
+                <p class="doc-text" data-edit-field="challenges">
+                  {d.challenges}
+                </p>
+              </div>
+            )}
+            {d.researchRelevance && (
+              <div class="doc-block">
+                <h3 class="doc-label">Research Relevance</h3>
+                <p class="doc-text" data-edit-field="researchRelevance">
+                  {d.researchRelevance}
+                </p>
+              </div>
+            )}
+          </div>
+        </section>
+      )
+    }
+
+    <!-- ============ VISUAL DOCUMENTATION ============ -->
+    {
+      d.mediaGallery && d.mediaGallery.length > 0 && (
+        <section class="block-section reveal">
+          <div class="block-header">
+            <>
+              <span class="block-num">{sec()}</span>
+              <h2 class="block-title">Visual Documentation</h2>
+            </>
+          </div>
+          <div class="gallery-grid">
+            {d.mediaGallery.map((url) => {
+              const isVideo = url.endsWith(".mp4");
+              return (
+                <button
+                  type="button"
+                  class="gallery-item"
+                  data-media-src={url}
+                  data-media-type={isVideo ? "video" : "image"}
+                  aria-label={isVideo ? "Play video fullscreen" : "View image fullscreen"}
+                >
+                  {isVideo ? (
+                    <video autoplay muted loop playsinline class="gallery-img">
+                      <source src={url} type="video/mp4" />
+                    </video>
+                  ) : (
+                    <img src={url} alt="Visual documentation" class="gallery-img" loading="lazy" />
+                  )}
+                  <span class="gallery-zoom" aria-hidden="true">
+                    {isVideo ? "▶" : "⤢"}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </section>
+      )
+    }
+
+    <!-- ============ CODE ============ -->
+    {
+      d.codeSnippet && (
+        <section class="block-section reveal">
+          <div class="block-header">
+            <>
+              <span class="block-num">{sec()}</span>
+              <h2 class="block-title">Source</h2>
+            </>
+          </div>
+          <div class="code-terminal collapsed" id="terminal-wrapper">
+            <button class="terminal-header" id="terminal-toggle-btn" aria-expanded="false">
+              <span class="terminal-title font-mono" id="terminal-status-title">
+                VIEW SOURCE — {d.codeLanguage}
+              </span>
+              <span class="terminal-arrow" id="toggle-indicator">
+                EXPAND [+]
+              </span>
+            </button>
+            <div class="terminal-body" id="terminal-content">
+              <div class="shiki-code-wrapper">
+                <Code code={d.codeSnippet} lang={d.codeLanguage} theme="github-dark" />
+              </div>
+            </div>
+          </div>
+        </section>
+      )
+    }
+
+    <!-- ============ BACK ============ -->
+    <a href="/" class="back-link" data-magnetic data-magnetic-strength="0.3">← All works</a>
+  </div>
+
+  <!-- Live Edit HUD (Only visible on localhost) -->
+  <div id="live-edit-hud" class="live-edit-hud" style="display: none;">
+    <button id="live-edit-toggle-btn" class="hud-btn font-mono">[EDIT LIVE]</button>
+    <div id="hud-actions" class="hud-actions hidden">
+      <span id="hud-log" class="hud-status font-mono">>>> EDIT ACTIVE</span>
+      <button id="live-edit-save-btn" class="hud-btn save font-mono">[SAVE]</button>
+      <button id="live-edit-cancel-btn" class="hud-btn cancel font-mono">[CANCEL]</button>
+    </div>
+  </div>
+
+  <!-- ============ MEDIA LIGHTBOX ============ -->
+  <div
+    class="media-lightbox"
+    id="media-lightbox"
+    role="dialog"
+    aria-modal="true"
+    aria-label="Media viewer"
+    hidden
+  >
+    <button class="lightbox-close" id="lightbox-close" type="button" aria-label="Close viewer">
+      ✕
+    </button>
+    <div class="lightbox-stage" id="lightbox-stage"></div>
+  </div>
+
+  <script
+    id="project-data-json"
+    type="application/json"
+    set:html={JSON.stringify({ id: project.id, data: project.data, body: project.body || "" })}
+  />
+</Layout>
+
+<script>
+  function initTerminal() {
+    const toggleBtn = document.getElementById("terminal-toggle-btn");
+    const wrap = document.getElementById("terminal-wrapper");
+    const ind = document.getElementById("toggle-indicator");
+    if (!toggleBtn || !wrap || !ind) return;
+    toggleBtn.addEventListener("click", () => {
+      const collapsed = wrap.classList.toggle("collapsed");
+      ind.textContent = collapsed ? "EXPAND [+]" : "COLLAPSE [-]";
+      toggleBtn.setAttribute("aria-expanded", String(!collapsed));
+    });
+  }
+
+  function initLiveEdit() {
+    const hud = document.getElementById("live-edit-hud");
+    const toggleBtn = document.getElementById("live-edit-toggle-btn");
+    const actions = document.getElementById("hud-actions");
+    const saveBtn = document.getElementById("live-edit-save-btn");
+    const cancelBtn = document.getElementById("live-edit-cancel-btn");
+    const log = document.getElementById("hud-log");
+    const jsonEl = document.getElementById("project-data-json");
+
+    if (!hud || !toggleBtn || !actions || !saveBtn || !cancelBtn || !jsonEl) return;
+
+    if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") {
+      hud.style.display = "flex";
+    } else {
+      hud.style.display = "none";
+      return;
+    }
+
+    let isEditing = false;
+    const projectData = JSON.parse(jsonEl.textContent);
+
+    const editableElements = {
+      title: document.querySelector('[data-edit-field="title"]'),
+      concept: document.querySelector('[data-edit-field="concept"]'),
+      academicContext: document.querySelector('[data-edit-field="academicContext"]'),
+      challenges: document.querySelector('[data-edit-field="challenges"]'),
+      researchRelevance: document.querySelector('[data-edit-field="researchRelevance"]'),
+      year: document.querySelector('[data-edit-field="year"]'),
+      category: document.querySelector('[data-edit-field="category"]'),
+      status: document.querySelector('[data-edit-field="status"]'),
+    };
+
+    const getStepElements = () => document.querySelectorAll("[data-edit-step-index]");
+    const getSpecTags = () => document.querySelectorAll("[data-edit-spec-tag]");
+
+    function toggleEditMode(active) {
+      isEditing = active;
+      if (active) {
+        toggleBtn.classList.add("hidden");
+        actions.classList.remove("hidden");
+        log.textContent = ">>> EDIT ACTIVE";
+        log.className = "hud-status font-mono";
+
+        Object.values(editableElements).forEach((el) => {
+          if (el) el.setAttribute("contenteditable", "true");
+        });
+        getStepElements().forEach((el) => {
+          el.setAttribute("contenteditable", "true");
+        });
+        getSpecTags().forEach((el) => {
+          el.setAttribute("contenteditable", "true");
+        });
+
+        const addBtns = document.querySelectorAll("[data-add-tag-for]");
+        addBtns.forEach((btn) => {
+          btn.style.display = "inline-flex";
+        });
+      } else {
+        toggleBtn.classList.remove("hidden");
+        actions.classList.add("hidden");
+
+        Object.values(editableElements).forEach((el) => {
+          if (el) el.removeAttribute("contenteditable");
+        });
+        getStepElements().forEach((el) => {
+          el.removeAttribute("contenteditable");
+        });
+        getSpecTags().forEach((el) => {
+          el.removeAttribute("contenteditable");
+        });
+
+        const addBtns = document.querySelectorAll("[data-add-tag-for]");
+        addBtns.forEach((btn) => {
+          btn.style.display = "none";
+        });
+      }
+    }
+
+    // Connect Add Tag buttons
+    const addTagBtns = document.querySelectorAll("[data-add-tag-for]");
+    addTagBtns.forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const type = btn.getAttribute("data-add-tag-for");
+        const container = btn.parentElement.querySelector(".tags-container");
+        if (container) {
+          const newTag = document.createElement("span");
+          newTag.className = "tag";
+          newTag.setAttribute("data-edit-spec-tag", type);
+          newTag.setAttribute("contenteditable", "true");
+          newTag.textContent = "NEW";
+          container.appendChild(newTag);
+          newTag.focus();
+
+          const range = document.createRange();
+          range.selectNodeContents(newTag);
+          const sel = window.getSelection();
+          sel.removeAllRanges();
+          sel.addRange(range);
+        }
+      });
+    });
+
+    toggleBtn.addEventListener("click", () => toggleEditMode(true));
+    cancelBtn.addEventListener("click", () => {
+      toggleEditMode(false);
+      window.location.reload();
+    });
+
+    saveBtn.addEventListener("click", async () => {
+      log.textContent = ">>> SAVING CHANGES...";
+      log.className = "hud-status font-mono text-purple";
+
+      if (editableElements.title)
+        projectData.data.title = editableElements.title.textContent.trim();
+      if (editableElements.concept)
+        projectData.data.concept = editableElements.concept.textContent.trim();
+      if (editableElements.academicContext)
+        projectData.data.academicContext = editableElements.academicContext.textContent.trim();
+      if (editableElements.challenges)
+        projectData.data.challenges = editableElements.challenges.textContent.trim();
+      if (editableElements.researchRelevance)
+        projectData.data.researchRelevance = editableElements.researchRelevance.textContent.trim();
+      if (editableElements.year)
+        projectData.data.year = Number(editableElements.year.textContent.trim());
+      if (editableElements.category)
+        projectData.data.category = editableElements.category.textContent.trim();
+      if (editableElements.status)
+        projectData.data.status = editableElements.status.textContent.trim();
+
+      const getTags = (type) => {
+        return Array.from(document.querySelectorAll(`[data-edit-spec-tag="${type}"]`))
+          .map((el) => el.textContent.trim())
+          .filter(Boolean);
+      };
+      projectData.data.software = getTags("software");
+      projectData.data.hardware = getTags("hardware");
+      projectData.data.inputs = getTags("inputs");
+
+      const steps = [];
+      const stepEls = Array.from(getStepElements());
+      stepEls.sort(
+        (a, b) =>
+          parseInt(a.getAttribute("data-edit-step-index")) -
+          parseInt(b.getAttribute("data-edit-step-index")),
+      );
+      stepEls.forEach((el) => {
+        steps.push(el.textContent.trim());
+      });
+      if (steps.length > 0) {
+        projectData.data.process = steps;
+      }
+
+      try {
+        const response = await fetch("http://localhost:4322/api/projects/save", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            id: projectData.id,
+            data: projectData.data,
+            body: projectData.body,
+          }),
+        });
+
+        if (response.ok) {
+          log.textContent = ">>> DISK WRITE OK [200]";
+          log.className = "hud-status font-mono text-green";
+          setTimeout(() => {
+            toggleEditMode(false);
+            window.location.reload();
+          }, 1000);
+        } else {
+          const errData = await response.json();
+          throw new Error(errData.error || "Failed to save");
+        }
+      } catch (err) {
+        log.textContent = `>>> ERROR: ${err.message.toUpperCase()}`;
+        log.className = "hud-status font-mono text-red";
+      }
+    });
+  }
+
+  // Click a gallery thumbnail to open the media in a fullscreen lightbox.
+  // Videos open with sound + native controls; images open at full size.
+  function initGallery() {
+    const lightbox = document.getElementById("media-lightbox") as HTMLElement | null;
+    const stage = document.getElementById("lightbox-stage");
+    const closeBtn = document.getElementById("lightbox-close");
+    const items = document.querySelectorAll<HTMLElement>(".gallery-item");
+    if (!lightbox || !stage || !closeBtn || items.length === 0) return;
+
+    let lastFocused: HTMLElement | null = null;
+
+    function openMedia(src: string, type: string) {
+      if (!lightbox || !stage || !closeBtn) return;
+      stage.innerHTML = "";
+
+      if (type === "video") {
+        const video = document.createElement("video");
+        video.src = src;
+        video.controls = true;
+        video.autoplay = true;
+        video.loop = true;
+        video.playsInline = true;
+        stage.appendChild(video);
+      } else {
+        const img = document.createElement("img");
+        img.src = src;
+        img.alt = "Visual documentation";
+        stage.appendChild(img);
+      }
+
+      lastFocused = document.activeElement as HTMLElement;
+      lightbox.hidden = false;
+      requestAnimationFrame(() => lightbox.classList.add("is-open"));
+      document.body.style.overflow = "hidden";
+      (closeBtn as HTMLElement).focus();
+    }
+
+    function closeMedia() {
+      if (!lightbox || !stage) return;
+      lightbox.classList.remove("is-open");
+      document.body.style.overflow = "";
+      window.setTimeout(() => {
+        lightbox.hidden = true;
+        stage.innerHTML = ""; // stops/unloads the playing video
+      }, 300);
+      if (lastFocused && typeof lastFocused.focus === "function") lastFocused.focus();
+    }
+
+    items.forEach((item) => {
+      item.addEventListener("click", () => {
+        openMedia(item.dataset.mediaSrc || "", item.dataset.mediaType || "image");
+      });
+    });
+
+    closeBtn.addEventListener("click", closeMedia);
+    lightbox.addEventListener("click", (e) => {
+      if (e.target === lightbox) closeMedia();
+    });
+  }
+
+  // Global Escape-to-close, bound once. Looks up the current lightbox live so it
+  // keeps working across view-transition page swaps.
+  if (!(window as any).__galleryEscBound) {
+    (window as any).__galleryEscBound = true;
+    document.addEventListener("keydown", (e) => {
+      if (e.key !== "Escape") return;
+      const lb = document.getElementById("media-lightbox");
+      if (lb && !lb.hidden) document.getElementById("lightbox-close")?.click();
+    });
+  }
+
+  function init() {
+    initTerminal();
+    initLiveEdit();
+    initGallery();
+  }
+
+  init();
+  document.addEventListener("astro:after-swap", init);
+</script>
+
+<style>
+  /* ============ HERO ============ */
+  .immersive-hero {
+    position: relative;
+    width: 100%;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding-bottom: 5rem;
+    background: var(--color-bg);
+    overflow: hidden;
+  }
+  .hero-video-wrapper {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+  }
+  .hero-video-wrapper video,
+  .hero-video-wrapper img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0.4;
+    filter: grayscale(1) contrast(1.05);
+  }
+  .hero-tint {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    background:
+      linear-gradient(to bottom, rgba(10, 10, 10, 0.5) 0%, transparent 30%, var(--color-bg) 97%),
+      linear-gradient(to right, rgba(10, 10, 10, 0.6) 0%, transparent 55%);
+  }
+  .hero-watermark {
+    position: absolute;
+    top: 14vh;
+    right: -1vw;
+    z-index: 2;
+    font-family: var(--font-sans);
+    font-weight: 400;
+    font-size: clamp(3.5rem, 11vw, 10rem);
+    line-height: 0.8;
+    text-transform: uppercase;
+    letter-spacing: -0.04em;
+    color: var(--color-text);
+    opacity: 0.04;
+    pointer-events: none;
+    user-select: none;
+  }
+  .hero-content {
+    position: relative;
+    z-index: 10;
+    width: 100%;
+  }
+  .hero-eyebrow-row {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    font-family: var(--font-mono);
+    font-size: 0.74rem;
+    letter-spacing: 0.1em;
+    margin-bottom: 1.4rem;
+  }
+  .hero-eyebrow-row span {
+    font-size: inherit;
+    letter-spacing: inherit;
+  }
+  .he-cat {
+    color: var(--color-accent);
+    font-weight: 700;
+    text-transform: uppercase;
+  }
+  .he-sep {
+    color: var(--color-border);
+  }
+  .he-year {
+    color: var(--color-muted);
+  }
+  .he-status.status-operational,
+  .he-status.status-active {
+    color: var(--color-success);
+  }
+  .he-status.status-archived {
+    color: var(--color-muted);
+  }
+  .he-status.status-in-development {
+    color: var(--color-warning);
+  }
+
+  .hero-title {
+    margin: 0;
+  }
+  .hero-title .line-mask,
+  .hero-title .line-mask > span {
+    font-family: var(--font-sans);
+    font-size: clamp(2rem, 5vw, 4rem);
+    font-weight: 400;
+    line-height: 1;
+    letter-spacing: -0.03em;
+    text-transform: uppercase;
+    color: var(--color-text);
+  }
+  .title-collab {
+    font-size: clamp(1rem, 2.5vw, 2rem);
+    opacity: 0.4;
+    font-family: var(--font-mono);
+    font-weight: normal;
+    text-transform: uppercase;
+    margin-left: 1rem;
+    vertical-align: middle;
+    letter-spacing: 0.05em;
+  }
+  .hero-meta-strip {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 1.8rem;
+  }
+  .hm-tag {
+    font-family: var(--font-mono);
+    font-size: 0.66rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--color-muted-lavender);
+    border: 1px solid var(--color-border);
+    padding: 5px 11px;
+  }
+  .hero-scroll-cue {
+    position: absolute;
+    right: 2rem;
+    bottom: 2rem;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    font-family: var(--font-mono);
+    font-size: 0.62rem;
+    letter-spacing: 0.18em;
+    color: var(--color-muted);
+  }
+  .hero-scroll-cue span {
+    font-size: inherit;
+    letter-spacing: inherit;
+    color: inherit;
+  }
+  .hsc-arrow {
+    color: var(--color-accent);
+    font-size: 0.95rem;
+    animation: bounce 1.5s infinite alternate;
+  }
+  @keyframes bounce {
+    from {
+      transform: translateY(0);
+    }
+    to {
+      transform: translateY(6px);
+    }
+  }
+
+  /* ============ LAYOUT ============ */
+  .spec-container {
+    padding-top: 6rem;
+    padding-bottom: 7rem;
+  }
+  .block-section {
+    margin-bottom: 6rem;
+  }
+  .block-header {
+    display: flex;
+    align-items: baseline;
+    gap: 1rem;
+    border-top: 1px solid var(--color-border);
+    padding-top: 1rem;
+    margin-bottom: 2.5rem;
+  }
+  .block-num {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--color-accent);
+    font-weight: 400;
+  }
+  .block-title {
+    font-family: var(--font-sans);
+    font-size: clamp(1.2rem, 2vw, 1.7rem);
+    font-weight: 400;
+    letter-spacing: -0.02em;
+    line-height: 1.05;
+  }
+
+  /* Concept + Spec split */
+  .split-section {
+    display: grid;
+    grid-template-columns: 1.3fr 1fr;
+    gap: 4rem;
+    margin-bottom: 6rem;
+  }
+  .concept-paragraph {
+    font-family: var(--font-body);
+    font-size: clamp(1rem, 1.3vw, 1.2rem);
+    font-weight: 300;
+    line-height: 1.65;
+    color: var(--color-muted-lavender);
+    margin-bottom: 2rem;
+    white-space: pre-line;
+  }
+  .markdown-extra :global(h3) {
+    font-family: var(--font-sans);
+    font-size: 0.95rem;
+    margin: 2rem 0 0.75rem;
+    color: var(--color-text);
+  }
+  .markdown-extra :global(p) {
+    font-family: var(--font-body);
+    font-size: 0.92rem;
+    color: var(--color-muted-lavender);
+    margin-bottom: 1rem;
+    line-height: 1.7;
+  }
+  .markdown-extra :global(pre) {
+    background: var(--color-card-bg);
+    border: 1px solid var(--color-border);
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+    font-size: 0.72rem;
+    overflow-x: auto;
+    color: var(--color-muted-lavender);
+  }
+  .markdown-extra :global(ul) {
+    list-style: none;
+    margin-bottom: 1.5rem;
+  }
+  .markdown-extra :global(li) {
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    color: var(--color-muted);
+    margin-bottom: 0.5rem;
+    padding-left: 14px;
+    position: relative;
+  }
+  .markdown-extra :global(li::before) {
+    content: "—";
+    position: absolute;
+    left: 0;
+    color: var(--color-accent);
+  }
+
+  /* Spec table */
+  .spec-table {
+    display: flex;
+    flex-direction: column;
+  }
+  .spec-row {
+    display: grid;
+    grid-template-columns: 7rem 1fr;
+    gap: 1rem;
+    padding: 0.9rem 0;
+    border-top: 1px solid var(--color-border);
+  }
+  .spec-row:last-child {
+    border-bottom: 1px solid var(--color-border);
+  }
+  .spec-row dt {
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-muted);
+  }
+  .spec-row dd {
+    font-family: var(--font-mono);
+    font-size: 0.86rem;
+    color: var(--color-text);
+  }
+  .spec-row dd.upper {
+    text-transform: uppercase;
+  }
+  .spec-row dd.tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+  .tag {
+    font-family: var(--font-mono);
+    font-size: 0.66rem;
+    color: var(--color-muted-lavender);
+    border: 1px solid var(--color-border);
+    padding: 2px 7px;
+  }
+  dd.status-operational,
+  dd.status-active {
+    color: var(--color-success);
+  }
+  dd.status-archived {
+    color: var(--color-muted);
+  }
+  dd.status-in-development {
+    color: var(--color-warning);
+  }
+
+  /* ============ PROCESS STEPS ============ */
+  .steps {
+    list-style: none;
+    counter-reset: none;
+  }
+  .step {
+    display: grid;
+    grid-template-columns: 3.5rem 1fr;
+    align-items: start;
+    gap: 1.5rem;
+    padding: 1.4rem 0;
+    border-top: 1px solid var(--color-border);
+  }
+  .step:last-child {
+    border-bottom: 1px solid var(--color-border);
+  }
+  .step-num {
+    font-family: var(--font-sans);
+    font-size: clamp(1.3rem, 2.4vw, 2rem);
+    font-weight: 400;
+    line-height: 1;
+    color: var(--color-accent);
+    letter-spacing: -0.02em;
+  }
+  .step-rule {
+    display: none;
+  }
+  .step-body {
+    font-family: var(--font-body);
+    font-size: clamp(0.95rem, 1.2vw, 1.1rem);
+    font-weight: 300;
+    line-height: 1.55;
+    color: var(--color-muted-lavender);
+    align-self: center;
+    max-width: 42em;
+  }
+
+  /* ============ DOCUMENTATION ============ */
+  .docs-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2.5rem;
+  }
+  .doc-block.full-width {
+    grid-column: 1 / -1;
+  }
+  .doc-label {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--color-accent);
+    margin-bottom: 0.9rem;
+  }
+  .doc-text {
+    font-family: var(--font-body);
+    font-size: 1rem;
+    line-height: 1.7;
+    color: var(--color-muted-lavender);
+  }
+
+  /* ============ BLUEPRINT ============ */
+  .blueprint-frame {
+    border: 1px solid var(--color-border);
+    background: var(--color-card-bg);
+  }
+  .blueprint-media {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 2.5rem;
+    background: var(--color-bg-soft);
+    border-bottom: 1px solid var(--color-border);
+  }
+  .blueprint-img {
+    max-width: 100%;
+    max-height: 70vh;
+    object-fit: contain;
+    filter: grayscale(1) contrast(1.05);
+  }
+  .blueprint-caption {
+    padding: 0.9rem 1.25rem;
+    font-size: 0.7rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--color-muted);
+  }
+
+  /* ============ GALLERY ============ */
+  .gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1rem;
+  }
+  .gallery-item {
+    position: relative;
+    display: block;
+    width: 100%;
+    padding: 0;
+    margin: 0;
+    border: 1px solid var(--color-border);
+    background: none;
+    overflow: hidden;
+    cursor: pointer;
+    font: inherit;
+    color: inherit;
+  }
+  .gallery-img {
+    width: 100%;
+    height: 240px;
+    object-fit: cover;
+    display: block;
+    filter: grayscale(1) contrast(1.03);
+    transition:
+      filter 0.5s var(--ease-out-expo),
+      transform 0.6s var(--ease-out-expo);
+  }
+  .gallery-item:hover .gallery-img,
+  .gallery-item:focus-visible .gallery-img {
+    filter: grayscale(0);
+    transform: scale(1.03);
+  }
+  /* Affordance badge — ▶ for video, ⤢ for image */
+  .gallery-zoom {
+    position: absolute;
+    bottom: 0.7rem;
+    right: 0.7rem;
+    width: 2.2rem;
+    height: 2.2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: var(--color-video-overlay);
+    border: 1px solid var(--color-border);
+    color: var(--color-text);
+    font-size: 0.8rem;
+    opacity: 0;
+    transform: translateY(4px);
+    transition:
+      opacity 0.3s var(--ease-out-expo),
+      transform 0.3s var(--ease-out-expo);
+    pointer-events: none;
+  }
+  .gallery-item:hover .gallery-zoom,
+  .gallery-item:focus-visible .gallery-zoom {
+    opacity: 1;
+    transform: none;
+  }
+
+  /* ============ MEDIA LIGHTBOX ============ */
+  .media-lightbox {
+    position: fixed;
+    inset: 0;
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 5vmin;
+    background-color: var(--color-video-overlay);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    opacity: 0;
+    transition: opacity 0.35s var(--ease-out-expo);
+  }
+  .media-lightbox[hidden] {
+    display: none;
+  }
+  .media-lightbox.is-open {
+    opacity: 1;
+  }
+  .lightbox-stage {
+    display: flex;
+    max-width: min(1100px, 92vw);
+    max-height: 86vh;
+    transform: scale(0.96);
+    transition: transform 0.35s var(--ease-out-expo);
+  }
+  .media-lightbox.is-open .lightbox-stage {
+    transform: scale(1);
+  }
+  .lightbox-stage video,
+  .lightbox-stage img {
+    display: block;
+    width: auto;
+    height: auto;
+    max-width: 100%;
+    max-height: 86vh;
+    border: 1px solid var(--color-border);
+    background: #000;
+  }
+  .lightbox-close {
+    position: fixed;
+    top: 1.25rem;
+    right: 1.5rem;
+    width: 2.5rem;
+    height: 2.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--color-border);
+    border-radius: 4px;
+    background: var(--color-video-overlay);
+    color: var(--color-text);
+    font-family: var(--font-mono);
+    font-size: 1rem;
+    cursor: pointer;
+    transition:
+      border-color 0.2s ease,
+      color 0.2s ease;
+  }
+  .lightbox-close:hover {
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+  }
+
+  /* ============ CODE ============ */
+  .code-terminal {
+    width: 100%;
+    border: 1px solid var(--color-border);
+  }
+  .terminal-header {
+    width: 100%;
+    border: none;
+    background: var(--color-card-bg);
+    cursor: pointer;
+    text-align: left;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.85rem 1.1rem;
+  }
+  .terminal-header:hover {
+    background: var(--color-bg-soft);
+  }
+  .terminal-title {
+    font-size: 0.72rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--color-muted);
+  }
+  .terminal-arrow {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    color: var(--color-accent);
+  }
+  .code-terminal.collapsed #terminal-content {
+    display: none;
+  }
+  .shiki-code-wrapper :global(pre) {
+    font-size: 0.8rem;
+    padding: 1.25rem;
+    overflow-x: auto;
+  }
+
+  /* ============ BACK ============ */
+  .back-link {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-text);
+    border-bottom: 1px solid var(--color-text);
+    padding-bottom: 4px;
+  }
+  .back-link:hover {
+    color: var(--color-accent);
+    border-color: var(--color-accent);
+  }
+
+  /* ============ RESPONSIVE ============ */
+  @media (max-width: 900px) {
+    .split-section {
+      grid-template-columns: 1fr;
+      gap: 3rem;
+    }
+    .docs-grid {
+      grid-template-columns: 1fr;
+    }
+    .immersive-hero {
+      height: 80vh;
+    }
+    .step {
+      grid-template-columns: 3rem 1fr;
+      gap: 1rem;
+    }
+  }
+
+  /* ============ LIVE EDIT HUD ============ */
+  .live-edit-hud {
+    position: fixed;
+    bottom: 4.5rem;
+    right: 2.5rem;
+    z-index: 9999;
+    background-color: var(--color-terminal-bg);
+    border: 1px solid var(--color-terminal-border);
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+  .hud-btn {
+    background: none;
+    border: 1px solid var(--color-accent);
+    color: var(--color-accent);
+    padding: 0.25rem 0.75rem;
+    cursor: pointer;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    transition: all 0.2s ease;
+  }
+  .hud-btn:hover {
+    background-color: var(--color-accent);
+    color: #000;
+  }
+  .hud-btn.hidden {
+    display: none;
+  }
+  .hud-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  .hud-actions.hidden {
+    display: none;
+  }
+  .hud-status {
+    font-size: 0.68rem;
+    color: var(--color-terminal-muted);
+  }
+  .hud-status.text-green {
+    color: #22c55e;
+  }
+  .hud-status.text-purple {
+    color: var(--color-accent);
+  }
+  .hud-status.text-red {
+    color: #ef4444;
+  }
+  .hud-btn.save {
+    border-color: #22c55e;
+    color: #22c55e;
+  }
+  .hud-btn.save:hover {
+    background-color: #22c55e;
+    color: #000;
+  }
+  .hud-btn.cancel {
+    border-color: var(--color-muted);
+    color: var(--color-muted);
+  }
+  .hud-btn.cancel:hover {
+    background-color: var(--color-muted);
+    color: #000;
+  }
+
+  .add-tag-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px dashed var(--color-accent);
+    color: var(--color-accent);
+    width: 18px;
+    height: 18px;
+    font-size: 0.65rem;
+    font-family: var(--font-mono);
+    cursor: pointer;
+    margin-left: 0.5rem;
+    vertical-align: middle;
+    transition: all 0.2s ease;
+  }
+  .add-tag-btn:hover {
+    background-color: var(--color-accent);
+    color: #000;
+    border-style: solid;
+  }
+  .tags-container {
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+
+  [contenteditable="true"] {
+    outline: 1px dashed var(--color-accent) !important;
+    outline-offset: 4px;
+    background-color: rgba(139, 111, 196, 0.05);
+  }
+  [contenteditable="true"]:focus {
+    outline: 1px solid var(--color-accent) !important;
+    background-color: rgba(139, 111, 196, 0.1);
+  }
+</style>

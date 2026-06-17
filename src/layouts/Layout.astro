@@ -1,0 +1,1037 @@
+---
+import "../styles/global.css";
+import { ClientRouter } from "astro:transitions";
+
+interface Props {
+  title: string;
+  description?: string;
+  image?: string;
+}
+
+const {
+  title,
+  description = "Interactive media art repository, hardware schematics, and code archives.",
+  image = "/assets/projects/bio-sonic-dust_hero.jpg",
+} = Astro.props;
+
+// Absolute URLs for canonical + social cards. Falls back to the request origin
+// when `site` is not configured in astro.config.mjs.
+const siteOrigin = Astro.site ?? new URL(Astro.url.origin);
+const canonicalURL = new URL(Astro.url.pathname, siteOrigin);
+const socialImage = new URL(image, siteOrigin);
+---
+
+<!doctype html>
+<html lang="en" id="root-html" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="description" content={description} />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" href="/favicon.svg" />
+    <link rel="canonical" href={canonicalURL} />
+    <meta name="generator" content={Astro.generator} />
+
+    <!-- SEO Title -->
+    <title>{title}</title>
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={canonicalURL} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content={socialImage} />
+    <meta property="og:site_name" content="Cristian Dubineanschi" />
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={socialImage} />
+
+    <!-- Inline script to set theme before paint to prevent FOUT -->
+    <script is:inline>
+      const savedTheme = localStorage.getItem("system-theme") || "dark";
+      document.documentElement.setAttribute("data-theme", savedTheme);
+    </script>
+
+    <!-- View Transitions -->
+    <ClientRouter />
+  </head>
+  <body id="root-body" class="custom-cursor-active">
+    <!-- Interactive dots grid (glows + nudges at line intersections near cursor) -->
+    <canvas id="grid-dots" transition:persist></canvas>
+
+    <!-- Dynamic Custom Particle Cursor Canvas -->
+    <canvas id="cursor-canvas" transition:persist></canvas>
+
+    <!-- Material depth overlays (grain + vignette) -->
+    <div class="fx-vignette" transition:persist></div>
+    <div class="fx-grain" transition:persist></div>
+
+    <!-- (theme glitch overlay removed) -->
+
+    <!-- System Shutter Boot Loader -->
+    <div id="loader-overlay" class="loader-overlay" style="display: none;">
+      <!-- Inline blocking script to prevent FOUC / loader flash on subsequent navigation -->
+      <script is:inline>
+        if (sessionStorage.getItem("system-booted") !== "true") {
+          document.getElementById("loader-overlay").style.display = "flex";
+        }
+      </script>
+
+      <div class="loader-shutter top"></div>
+      <div class="loader-shutter bottom"></div>
+
+      <div class="loader-content" id="loader-content">
+        <span class="loader-brand">CRISTIAN DUBINEANSCHI</span>
+        <span class="loader-sub font-mono">New Media Artist</span>
+        <div class="loader-line"><div class="loader-line-fill" id="progress-fill"></div></div>
+        <span class="loader-pct font-mono"><span id="progress-percent">00</span>%</span>
+      </div>
+    </div>
+
+    <!-- System Header / Terminal Status -->
+    <header class="system-header" id="main-header" transition:persist>
+      <div class="header-container">
+        <a href="/" class="brand-link-new" id="nav-brand">
+          <span class="brand-title">CRISTIAN DUBINEANSCHI</span>
+          <span class="brand-subtitle font-mono">New Media Artist</span>
+        </a>
+
+        <nav class="nav-menu" id="nav-menu-links">
+          <a href="/" class="nav-link active" id="nav-link-terminal">Works</a>
+          <a href="/about" class="nav-link" id="nav-link-about">About</a>
+          <a href="/contact" class="nav-link" id="nav-link-contact">Contact</a>
+          <a href="/admin" class="nav-link" id="nav-link-admin" style="display: none;">Control</a>
+
+          <button id="theme-toggle" class="theme-toggle-btn" aria-label="Toggle theme">
+            <span class="toggle-indicator-light"></span>
+            <span id="theme-btn-text">DARK</span>
+          </button>
+        </nav>
+      </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main id="main-content" transition:animate="fade">
+      <slot />
+    </main>
+
+    <!-- Fixed Technical Status Bar (Mockup bottom HUD) -->
+    <div class="system-status-bar" id="status-bar-daemon">
+      <div class="status-bar-container">
+        <div class="status-left font-mono">
+          <span class="status-light-pulse"></span>
+          © 2026 CRISTIAN DUBINEANSCHI — AVAILABLE FOR SELECTED WORK <span class="blink-cursor"
+            >▋</span
+          >
+        </div>
+        <div class="status-right font-mono">
+          <div class="osc-container-new">
+            <span class="meta-label">SYS_MON:</span>
+            <canvas id="osc-canvas" width="60" height="15"></canvas>
+          </div>
+          <span class="divider">|</span>
+          <span class="meta-label">LOC:</span>
+          <span class="meta-val">46.77° N, 23.59° E</span>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      function applyTheme() {
+        const currentTheme = localStorage.getItem("system-theme") || "dark";
+        document.documentElement.setAttribute("data-theme", currentTheme);
+        const btnText = document.getElementById("theme-btn-text");
+        if (btnText) {
+          btnText.textContent = currentTheme.toUpperCase();
+        }
+      }
+
+      function setupThemeToggle() {
+        const toggleBtn = document.getElementById("theme-toggle");
+        if (!toggleBtn) return;
+
+        if (toggleBtn.dataset.listenerBound) return;
+        toggleBtn.dataset.listenerBound = "true";
+
+        toggleBtn.addEventListener("click", () => {
+          const activeTheme = document.documentElement.getAttribute("data-theme") || "dark";
+          const nextTheme = activeTheme === "dark" ? "light" : "dark";
+          localStorage.setItem("system-theme", nextTheme);
+          applyTheme();
+        });
+      }
+
+      function setupOscilloscope() {
+        const canvas = document.getElementById("osc-canvas") as HTMLCanvasElement;
+        if (!canvas) return;
+        const ctx = canvas.getContext("2d");
+        if (!ctx) return;
+
+        let animationId: number;
+        let phase = 0;
+        const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+        function draw() {
+          if (!ctx || !canvas) return;
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+          const theme = document.documentElement.getAttribute("data-theme") || "dark";
+          ctx.strokeStyle = theme === "dark" ? "#a98fdb" : "#5f4a93";
+          ctx.lineWidth = 1.5;
+          ctx.beginPath();
+
+          for (let x = 0; x < canvas.width; x++) {
+            const angle = (x / canvas.width) * Math.PI * 4 + phase;
+            // Skip per-frame random jitter when motion is reduced.
+            const noise = reduceMotion ? 0 : (Math.random() - 0.5) * 1.5 * Math.sin(phase * 1.5);
+            const y = canvas.height / 2 + Math.sin(angle) * 4 + noise;
+
+            if (x === 0) {
+              ctx.moveTo(x, y);
+            } else {
+              ctx.lineTo(x, y);
+            }
+          }
+
+          ctx.stroke();
+
+          // Reduced motion: draw a single static waveform and stop.
+          if (reduceMotion) return;
+
+          phase += 0.08;
+          animationId = requestAnimationFrame(draw);
+        }
+
+        draw();
+
+        // Clean up animation on swap to avoid leaks
+        document.addEventListener(
+          "astro:before-swap",
+          () => {
+            cancelAnimationFrame(animationId);
+          },
+          { once: true },
+        );
+      }
+
+      function setupBootLoader() {
+        const overlay = document.getElementById("loader-overlay");
+        const progressFill = document.getElementById("progress-fill");
+        const progressPercent = document.getElementById("progress-percent");
+
+        if (!overlay || !progressFill || !progressPercent) return;
+
+        // If already booted in this browser session, skip animation
+        if (sessionStorage.getItem("system-booted") === "true") {
+          overlay.classList.add("hidden-loader");
+          return;
+        }
+
+        let progress = 0;
+        const progressInterval = setInterval(() => {
+          progress += Math.floor(Math.random() * 9) + 4;
+          if (progress >= 100) {
+            progress = 100;
+            clearInterval(progressInterval);
+            setTimeout(() => {
+              overlay.classList.add("reveal");
+              sessionStorage.setItem("system-booted", "true");
+              setTimeout(() => overlay.classList.add("hidden-loader"), 850);
+            }, 250);
+          }
+          progressFill.style.width = `${progress}%`;
+          progressPercent.textContent = String(progress).padStart(2, "0");
+        }, 60);
+      }
+
+      function setupAdminVisibility() {
+        const adminLink = document.getElementById("nav-link-admin");
+        if (!adminLink) return;
+
+        if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") {
+          adminLink.style.display = "inline-block";
+        } else {
+          adminLink.style.display = "none";
+        }
+      }
+
+      // Active link highlight script
+      function setupActiveNav() {
+        const path = window.location.pathname;
+        const links = document.querySelectorAll(".nav-link");
+        let activeLink = null;
+
+        links.forEach((link) => {
+          link.classList.remove("active");
+          const href = link.getAttribute("href");
+
+          // Avoid matching external links, mailto, or hashes
+          if (href && !href.startsWith("http") && !href.startsWith("mailto") && href !== "#") {
+            const isRoot = href === "/";
+            // WORKS matches root index '/' or any subproject page starting with '/projects/'
+            const isMatch =
+              href === path ||
+              (!isRoot && path.startsWith(href)) ||
+              (isRoot && (path === "/" || path.startsWith("/projects/")));
+
+            if (isMatch) {
+              link.classList.add("active");
+              activeLink = link;
+            }
+          }
+        });
+
+        // Trigger positioning
+        updateNavIndicator();
+        setTimeout(updateNavIndicator, 50);
+        setTimeout(updateNavIndicator, 200);
+      }
+
+      function updateNavIndicator() {
+        const activeLink = document.querySelector(".nav-link.active") as HTMLElement;
+        const indicator = document.getElementById("nav-indicator");
+
+        if (!activeLink || !indicator) {
+          if (indicator) indicator.style.opacity = "0";
+          return;
+        }
+
+        const leftOffset = activeLink.offsetLeft;
+        const width = activeLink.offsetWidth;
+
+        // Extend the line on both sides by 32px to cover the gap and overlap 30% of adjacent menu links
+        const extraPerSide = 32;
+        const finalWidth = width + extraPerSide * 2;
+        const finalLeft = leftOffset - extraPerSide;
+
+        indicator.style.width = `${finalWidth}px`;
+        indicator.style.transform = `translateX(${finalLeft}px)`;
+        indicator.style.opacity = "1";
+      }
+
+      // Handle resizing alignment
+      window.addEventListener("resize", updateNavIndicator);
+      window.addEventListener("load", updateNavIndicator);
+      if (typeof document !== "undefined" && "fonts" in document) {
+        document.fonts.ready.then(updateNavIndicator);
+      }
+
+      function setupCustomCursor() {
+        const canvas = document.getElementById("cursor-canvas") as HTMLCanvasElement;
+        if (!canvas) return;
+
+        if (canvas.dataset.initialized === "true") return;
+        canvas.dataset.initialized = "true";
+
+        const ctx = canvas.getContext("2d");
+        if (!ctx) return;
+
+        let theme = document.documentElement.getAttribute("data-theme") || "dark";
+
+        const themeObserver = new MutationObserver((mutations) => {
+          mutations.forEach((mutation) => {
+            if (mutation.attributeName === "data-theme") {
+              theme = document.documentElement.getAttribute("data-theme") || "dark";
+            }
+          });
+        });
+        themeObserver.observe(document.documentElement, { attributes: true });
+
+        function resizeCanvas() {
+          if (!canvas) return;
+          canvas.width = window.innerWidth;
+          canvas.height = window.innerHeight;
+        }
+        resizeCanvas();
+        window.addEventListener("resize", resizeCanvas);
+
+        // Disable the canvas cursor on touch/small screens and for users who
+        // prefer reduced motion — restoring the native cursor in those cases.
+        const disableCursor =
+          window.matchMedia("(pointer: coarse)").matches ||
+          window.matchMedia("(prefers-reduced-motion: reduce)").matches ||
+          window.innerWidth < 768;
+
+        if (disableCursor) {
+          canvas.style.display = "none";
+          document.body.classList.remove("custom-cursor-active");
+          return;
+        }
+
+        const mouse = { x: -100, y: -100, lastX: -100, lastY: -100, active: false };
+        const smoothMouse = { x: -100, y: -100 };
+        const particles: any[] = [];
+
+        let isHovering = false;
+        let hoverProgress = 0;
+        let rotationAngle = 0;
+        const clickablesSelector =
+          'a, button, select, input, textarea, .theme-toggle-btn, .project-card, [role="button"], [role="link"]';
+
+        const handleMouseOver = (e: MouseEvent) => {
+          const target = e.target as HTMLElement;
+          if (!target) return;
+          if (target.closest(clickablesSelector) || getComputedStyle(target).cursor === "pointer") {
+            isHovering = true;
+            (window as any).sysHoverActive = true;
+          }
+        };
+
+        const handleMouseOut = (e: MouseEvent) => {
+          const target = e.target as HTMLElement;
+          const related = e.relatedTarget as HTMLElement;
+          if (!target) return;
+          if (!related || !related.closest(clickablesSelector)) {
+            isHovering = false;
+            (window as any).sysHoverActive = false;
+          }
+        };
+
+        document.addEventListener("mouseover", handleMouseOver, { passive: true });
+        document.addEventListener("mouseout", handleMouseOut, { passive: true });
+
+        function spawnParticle(x: number, y: number, count = 1, isClick = false) {
+          const dx = mouse.x - smoothMouse.x;
+          const dy = mouse.y - smoothMouse.y;
+          const moveAngle = Math.atan2(dy, dx);
+          const moveSpeed = Math.sqrt(dx * dx + dy * dy);
+
+          for (let i = 0; i < count; i++) {
+            let vx, vy;
+
+            if (isClick) {
+              const angle = Math.random() * Math.PI * 2;
+              const speed = 1.5 + Math.random() * 2.5;
+              vx = Math.cos(angle) * speed;
+              vy = Math.sin(angle) * speed;
+            } else {
+              // Eject opposite to movement direction with angular dispersion
+              const oppositeAngle = moveAngle + Math.PI + (Math.random() - 0.5) * 0.8;
+              // If hovering, particles eject faster (higher energy sparks)
+              const speedFactor = isHovering ? 0.25 : 0.12;
+              const speedOffset = isHovering ? 0.4 : 0.15;
+              const speedRandom = isHovering ? 0.8 : 0.35;
+              const speed = moveSpeed * speedFactor + speedOffset + Math.random() * speedRandom;
+
+              vx = Math.cos(oppositeAngle) * speed;
+              vy = Math.sin(oppositeAngle) * speed;
+            }
+
+            let colorString = "";
+            if (theme === "dark") {
+              colorString =
+                Math.random() < 0.7 ? "rgba(139, 111, 196, ALPHA)" : "rgba(255, 255, 255, ALPHA)";
+            } else {
+              colorString =
+                Math.random() < 0.7 ? "rgba(95, 74, 147, ALPHA)" : "rgba(15, 23, 42, ALPHA)";
+            }
+
+            particles.push({
+              x,
+              y,
+              vx,
+              vy,
+              size: isClick
+                ? 1.5 + Math.random() * 2.5
+                : isHovering
+                  ? 0.7 + Math.random() * 1.0
+                  : 0.5 + Math.random() * 1.0,
+              alpha: 1.0,
+              // Decay is much faster when hovering (creates a short tail of hot sparks)
+              decay: isClick
+                ? 0.015 + Math.random() * 0.01
+                : isHovering
+                  ? 0.035 + Math.random() * 0.025
+                  : 0.018 + Math.random() * 0.012,
+              color: colorString,
+            });
+          }
+        }
+
+        window.addEventListener(
+          "mousemove",
+          (e) => {
+            mouse.x = e.clientX;
+            mouse.y = e.clientY;
+
+            if (!mouse.active) {
+              smoothMouse.x = mouse.x;
+              smoothMouse.y = mouse.y;
+            }
+
+            mouse.active = true;
+            document.body.classList.add("custom-cursor-active");
+          },
+          { passive: true },
+        );
+
+        document.addEventListener("mouseleave", () => {
+          mouse.active = false;
+          document.body.classList.remove("custom-cursor-active");
+        });
+
+        window.addEventListener(
+          "mousedown",
+          (e) => {
+            if (mouse.active) {
+              spawnParticle(smoothMouse.x, smoothMouse.y, 12, true);
+            }
+          },
+          { passive: true },
+        );
+
+        let animId: number;
+        function update() {
+          if (!ctx || !canvas) return;
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+          // Smooth hover progress transition
+          if (isHovering) {
+            hoverProgress += (1 - hoverProgress) * 0.15;
+          } else {
+            hoverProgress += (0 - hoverProgress) * 0.15;
+          }
+
+          // Orbit speed increases when hovering (moon orbit)
+          const orbitSpeed = 0.025 + hoverProgress * 0.055;
+          rotationAngle += orbitSpeed;
+
+          if (mouse.active) {
+            smoothMouse.x += (mouse.x - smoothMouse.x) * 0.1;
+            smoothMouse.y += (mouse.y - smoothMouse.y) * 0.1;
+          }
+
+          for (let i = particles.length - 1; i >= 0; i--) {
+            const p = particles[i];
+            p.x += p.vx;
+            p.y += p.vy;
+            p.alpha -= p.decay;
+            p.size *= 0.96; // Tapering rate
+
+            if (p.alpha <= 0 || p.size < 0.2) {
+              particles.splice(i, 1);
+              continue;
+            }
+
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+            ctx.fillStyle = p.color.replace("ALPHA", p.alpha.toFixed(2));
+
+            if (isHovering || p.size > 3) {
+              ctx.shadowBlur = 4;
+              ctx.shadowColor = theme === "dark" ? "#a98fdb" : "#5f4a93";
+            }
+
+            ctx.fill();
+            ctx.shadowBlur = 0;
+          }
+
+          if (mouse.active) {
+            // Draw faint orbit line (earth-moon system)
+            const orbitRadius = 13 + hoverProgress * 8;
+            ctx.beginPath();
+            ctx.arc(smoothMouse.x, smoothMouse.y, orbitRadius, 0, Math.PI * 2);
+            ctx.strokeStyle =
+              theme === "dark"
+                ? `rgba(139, 111, 196, ${0.08 + hoverProgress * 0.14})`
+                : `rgba(95, 74, 147, ${0.06 + hoverProgress * 0.12})`;
+            ctx.lineWidth = 0.8;
+            ctx.stroke();
+
+            // Draw orbiting moon satellite
+            const moonX = smoothMouse.x + Math.cos(rotationAngle) * orbitRadius;
+            const moonY = smoothMouse.y + Math.sin(rotationAngle) * orbitRadius;
+            const moonSize = 1.1 + hoverProgress * 0.9;
+            ctx.beginPath();
+            ctx.arc(moonX, moonY, moonSize, 0, Math.PI * 2);
+            ctx.fillStyle = theme === "dark" ? "#ffffff" : "#5f4a93";
+            if (hoverProgress > 0.1) {
+              ctx.shadowBlur = 3;
+              ctx.shadowColor = theme === "dark" ? "#a98fdb" : "#5f4a93";
+            }
+            ctx.fill();
+            ctx.shadowBlur = 0;
+
+            const coreSize = 3.0;
+            const comaSize = isHovering ? 11.0 : 6.5;
+            const glowSize = isHovering ? 26 : 15;
+
+            // Outer envelope
+            ctx.beginPath();
+            ctx.arc(smoothMouse.x, smoothMouse.y, glowSize, 0, Math.PI * 2);
+            ctx.fillStyle =
+              theme === "dark" ? "rgba(139, 111, 196, 0.15)" : "rgba(95, 74, 147, 0.12)";
+            ctx.fill();
+
+            // Coma
+            ctx.beginPath();
+            ctx.arc(smoothMouse.x, smoothMouse.y, comaSize, 0, Math.PI * 2);
+            ctx.fillStyle =
+              theme === "dark" ? "rgba(169, 143, 219, 0.35)" : "rgba(95, 74, 147, 0.3)";
+            ctx.fill();
+
+            // Bright Nucleus
+            ctx.beginPath();
+            ctx.arc(smoothMouse.x, smoothMouse.y, coreSize, 0, Math.PI * 2);
+            ctx.fillStyle = theme === "dark" ? "#ffffff" : "#5f4a93";
+            ctx.shadowBlur = 4;
+            ctx.shadowColor = theme === "dark" ? "#a98fdb" : "#5f4a93";
+            ctx.fill();
+            ctx.shadowBlur = 0;
+          }
+
+          animId = requestAnimationFrame(update);
+        }
+        update();
+
+        document.addEventListener(
+          "astro:before-swap",
+          () => {
+            if (!document.getElementById("cursor-canvas")) {
+              cancelAnimationFrame(animId);
+              themeObserver.disconnect();
+              document.removeEventListener("mouseover", handleMouseOver);
+              document.removeEventListener("mouseout", handleMouseOut);
+            }
+          },
+          { once: true },
+        );
+      }
+
+      // Initialize
+      // Scroll-reveal: fade/translate/mask entrances via IntersectionObserver
+      let revealObserver: IntersectionObserver | null = null;
+      function setupReveal() {
+        const els = Array.from(
+          document.querySelectorAll(".reveal, .reveal-clip, .line-mask"),
+        ) as HTMLElement[];
+        if (!("IntersectionObserver" in window)) {
+          els.forEach((el) => el.classList.add("is-visible"));
+          return;
+        }
+        if (revealObserver) revealObserver.disconnect();
+        revealObserver = new IntersectionObserver(
+          (entries, obs) => {
+            entries.forEach((entry) => {
+              if (entry.isIntersecting) {
+                (entry.target as HTMLElement).classList.add("is-visible");
+                obs.unobserve(entry.target);
+              }
+            });
+          },
+          { rootMargin: "0px 0px -8% 0px", threshold: 0.12 },
+        );
+        els.forEach((el) => {
+          if (!el.classList.contains("is-visible")) revealObserver!.observe(el);
+        });
+      }
+
+      // Magnetic hover for [data-magnetic] elements
+      function setupMagnetic() {
+        if (window.matchMedia("(pointer: coarse)").matches) return;
+        const els = Array.from(document.querySelectorAll("[data-magnetic]")) as HTMLElement[];
+        els.forEach((el) => {
+          if (el.dataset.magBound) return;
+          el.dataset.magBound = "true";
+          const strength = parseFloat(el.dataset.magnetic || "0.3");
+          el.addEventListener("mousemove", (e) => {
+            const r = el.getBoundingClientRect();
+            const mx = e.clientX - (r.left + r.width / 2);
+            const my = e.clientY - (r.top + r.height / 2);
+            el.style.transform = `translate(${mx * strength}px, ${my * strength}px)`;
+          });
+          el.addEventListener("mouseleave", () => {
+            el.style.transform = "translate(0, 0)";
+          });
+        });
+      }
+
+      // Interactive dots at the grid-line intersections: glow + repel-nudge near the cursor
+      function setupGridDots() {
+        const canvas = document.getElementById("grid-dots") as HTMLCanvasElement;
+        if (!canvas) return;
+        if (canvas.dataset.initialized === "true") return;
+        canvas.dataset.initialized = "true";
+
+        const ctx = canvas.getContext("2d");
+        if (!ctx) return;
+
+        if (
+          window.matchMedia("(pointer: coarse)").matches ||
+          window.matchMedia("(prefers-reduced-motion: reduce)").matches
+        ) {
+          canvas.style.display = "none";
+          return;
+        }
+
+        const GRID = 80; // matches --grid-size
+        const RADIUS = 190; // cursor influence radius
+        const PUSH = 7; // max nudge (px) away from cursor
+        const BASE_R = 1.0,
+          GLOW_R = 2.2;
+        const BASE_A = 0.16,
+          GLOW_A = 0.95;
+
+        let theme = document.documentElement.getAttribute("data-theme") || "dark";
+        const accent = () => (theme === "dark" ? [180, 150, 235] : [95, 74, 147]);
+        const base = () => (theme === "dark" ? [130, 130, 130] : [150, 145, 132]);
+
+        const themeObserver = new MutationObserver(() => {
+          theme = document.documentElement.getAttribute("data-theme") || "dark";
+        });
+        themeObserver.observe(document.documentElement, {
+          attributes: true,
+          attributeFilter: ["data-theme"],
+        });
+
+        let dots: { bx: number; by: number; ox: number; oy: number; g: number }[] = [];
+        function build() {
+          if (!canvas) return;
+          canvas.width = window.innerWidth;
+          canvas.height = window.innerHeight;
+          dots = [];
+          for (let x = 0; x <= canvas.width + GRID; x += GRID) {
+            for (let y = 0; y <= canvas.height + GRID; y += GRID) {
+              dots.push({ bx: x, by: y, ox: 0, oy: 0, g: 0 });
+            }
+          }
+        }
+        build();
+        window.addEventListener("resize", build);
+
+        const mouse = { x: -9999, y: -9999 };
+        window.addEventListener(
+          "mousemove",
+          (e) => {
+            mouse.x = e.clientX;
+            mouse.y = e.clientY;
+          },
+          { passive: true },
+        );
+        document.addEventListener("mouseleave", () => {
+          mouse.x = -9999;
+          mouse.y = -9999;
+        });
+
+        let animId: number;
+        function draw() {
+          if (!ctx || !canvas) return;
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          const [ar, ag, ab] = accent();
+          const [br, bg, bb] = base();
+
+          for (const d of dots) {
+            const dx = d.bx - mouse.x;
+            const dy = d.by - mouse.y;
+            const dist = Math.hypot(dx, dy);
+            const inf = dist < RADIUS ? 1 - dist / RADIUS : 0;
+            const eased = inf * inf; // sharper falloff
+
+            // ease glow + repel offset toward target
+            d.g += (eased - d.g) * 0.12;
+            const tx = dist > 0 ? (dx / dist) * PUSH * eased : 0;
+            const ty = dist > 0 ? (dy / dist) * PUSH * eased : 0;
+            d.ox += (tx - d.ox) * 0.12;
+            d.oy += (ty - d.oy) * 0.12;
+
+            const alpha = BASE_A + (GLOW_A - BASE_A) * d.g;
+            const r = BASE_R + (GLOW_R - BASE_R) * d.g;
+            const cr = Math.round(br + (ar - br) * d.g);
+            const cg = Math.round(bg + (ag - bg) * d.g);
+            const cb = Math.round(bb + (ab - bb) * d.g);
+
+            ctx.beginPath();
+            ctx.arc(d.bx + d.ox, d.by + d.oy, r, 0, Math.PI * 2);
+            ctx.fillStyle = `rgba(${cr}, ${cg}, ${cb}, ${alpha.toFixed(3)})`;
+            if (d.g > 0.05) {
+              ctx.shadowBlur = 8 * d.g;
+              ctx.shadowColor = `rgba(${ar}, ${ag}, ${ab}, ${d.g.toFixed(3)})`;
+            }
+            ctx.fill();
+            ctx.shadowBlur = 0;
+          }
+          animId = requestAnimationFrame(draw);
+        }
+        draw();
+
+        document.addEventListener(
+          "astro:before-swap",
+          () => {
+            if (!document.getElementById("grid-dots")) {
+              cancelAnimationFrame(animId);
+              themeObserver.disconnect();
+              window.removeEventListener("resize", build);
+            }
+          },
+          { once: true },
+        );
+      }
+
+      function init() {
+        applyTheme();
+        setupThemeToggle();
+        setupOscilloscope();
+        setupBootLoader();
+        setupAdminVisibility();
+        setupActiveNav();
+        setupCustomCursor();
+        setupGridDots();
+        setupReveal();
+        setupMagnetic();
+      }
+
+      // Persist theme choice on the incoming document before swap happens to avoid theme flash/strobe
+      document.addEventListener("astro:before-swap", (event) => {
+        const theme = localStorage.getItem("system-theme") || "dark";
+        (event as any).newDocument.documentElement.setAttribute("data-theme", theme);
+      });
+
+      init();
+      document.addEventListener("astro:after-swap", init);
+    </script>
+
+    <style>
+      .system-header {
+        background-color: var(--color-header-bg);
+        backdrop-filter: blur(14px);
+        -webkit-backdrop-filter: blur(14px);
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        padding: 1rem 0;
+        border-bottom: 1px solid var(--color-border);
+        transition:
+          background-color 0.4s ease,
+          border-bottom-color 0.4s ease;
+      }
+      .header-container {
+        margin: 0 auto;
+        padding: 0 2.5rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .brand-link-new {
+        display: flex;
+        flex-direction: column;
+        gap: 1px;
+        color: var(--color-text);
+        transition: color 0.3s ease;
+      }
+      .brand-title {
+        font-family: var(--font-sans);
+        font-weight: 500;
+        font-size: 0.98rem;
+        letter-spacing: 0;
+        text-transform: uppercase;
+        color: var(--color-text);
+      }
+      .brand-subtitle {
+        font-size: 0.62rem;
+        color: var(--color-muted);
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+      }
+      .brand-link-new:hover .brand-title {
+        color: var(--color-accent);
+      }
+      .nav-menu {
+        display: flex;
+        align-items: center;
+        gap: 1.75rem;
+        position: relative;
+      }
+      .nav-link {
+        font-family: var(--font-mono);
+        font-size: 0.78rem;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: var(--color-muted);
+        position: relative;
+        padding: 0.4rem 0;
+      }
+      .nav-link::after {
+        content: "";
+        position: absolute;
+        left: 0;
+        bottom: 0;
+        width: 0;
+        height: 1px;
+        background: var(--color-accent);
+        transition: width 0.35s var(--ease-out-expo);
+      }
+      .nav-link:hover {
+        color: var(--color-text);
+      }
+      .nav-link:hover::after {
+        width: 100%;
+      }
+      .nav-link.active {
+        color: var(--color-text);
+      }
+      .nav-link.active::after {
+        width: 100%;
+      }
+      .nav-highlight-indicator {
+        display: none;
+      }
+
+      @media (max-width: 1024px) {
+        .nav-menu {
+          gap: 1rem;
+        }
+        .theme-toggle-btn span:last-child {
+          display: none;
+        }
+        .theme-toggle-btn {
+          padding: 0.35rem;
+        }
+      }
+      @media (max-width: 768px) {
+        .header-container {
+          flex-direction: column;
+          align-items: stretch;
+          gap: 1rem;
+        }
+        .brand-link-new {
+          align-items: center;
+          text-align: center;
+        }
+        .nav-menu {
+          width: 100%;
+          justify-content: space-between;
+          align-items: center;
+          flex-wrap: nowrap;
+          gap: 0.5rem;
+        }
+        .system-header {
+          padding: 1rem 0 0.5rem 0;
+        }
+      }
+      .indicator-triangle {
+        position: absolute;
+        top: -4px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 0;
+        height: 0;
+        border-left: 4px solid transparent;
+        border-right: 4px solid transparent;
+        border-bottom: 4px solid var(--color-accent);
+        filter: drop-shadow(0 0 3px var(--color-accent));
+      }
+      .indicator-glow {
+        position: absolute;
+        top: -15px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 20px;
+        height: 15px;
+        background: radial-gradient(
+          ellipse at bottom,
+          rgba(139, 111, 196, 0.4) 0%,
+          rgba(139, 111, 196, 0) 70%
+        );
+      }
+
+      /* Sticky HUD status bar at bottom */
+      .system-status-bar {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        background-color: var(--color-status-bg);
+        border-top: 1px solid var(--color-border);
+        padding: 0.5rem 0;
+        z-index: 1000;
+        box-shadow: 0 -5px 20px rgba(0, 0, 0, 0.3);
+        transition:
+          background-color 0.4s ease,
+          border-top-color 0.4s ease;
+      }
+      .status-bar-container {
+        margin: 0 auto;
+        padding: 0 2.5rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .status-left,
+      .status-right {
+        font-size: 0.65rem;
+        color: var(--color-muted);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .status-light-pulse {
+        width: 5px;
+        height: 5px;
+        border-radius: 50%;
+        background-color: var(--color-accent);
+        box-shadow: 0 0 6px var(--color-accent);
+        animation: status-glow 1s infinite alternate;
+      }
+      @keyframes status-glow {
+        0% {
+          opacity: 0.5;
+        }
+        100% {
+          opacity: 1;
+        }
+      }
+      .osc-container-new {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+      #osc-canvas {
+        vertical-align: middle;
+        opacity: 0.85;
+      }
+      .divider {
+        color: var(--color-border);
+      }
+
+      body {
+        padding-bottom: 3.5rem; /* Space so content is not hidden by the status bar */
+      }
+
+      @media (max-width: 768px) {
+        .brand-title {
+          font-size: 1.4rem;
+        }
+        .header-container {
+          padding: 0 1rem;
+        }
+        .status-bar-container {
+          padding: 0 1rem;
+        }
+        .status-right {
+          display: none;
+        }
+      }
+
+      /* Custom HUD Reticle Cursor Styles */
+      #cursor-canvas {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        z-index: 99999;
+        pointer-events: none;
+        display: none;
+      }
+
+      @media (pointer: fine) {
+        #cursor-canvas {
+          display: block;
+        }
+      }
+    </style>
+  </body>
+</html>

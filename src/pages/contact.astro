@@ -1,0 +1,427 @@
+---
+import Layout from "../layouts/Layout.astro";
+---
+
+<Layout
+  title="Contact — Cristian Dubineanschi"
+  description="Get in touch with Cristian Dubineanschi — available for selected new-media, installation, and visual design work."
+>
+  <div class="contact-container container" id="contact-main-container">
+    <!-- Page Header -->
+    <section class="contact-header" id="contact-title-sec">
+      <div class="header-line" id="contact-line-div"></div>
+      <span class="system-code">Available for selected work — UTC+2</span>
+      <h1 class="page-title cursor" id="contact-page-title">Contact</h1>
+    </section>
+
+    <!-- Two Column Data Grid -->
+    <div class="contact-grid" id="contact-grid-content">
+      <!-- Left Column: Interactive Signal Terminal Form -->
+      <div class="contact-left" id="contact-form-column">
+        <h2 class="section-title">01. Send a message</h2>
+        <div class="terminal-form-box glow-border">
+          <div class="terminal-form-header">
+            <span class="form-dot red"></span>
+            <span class="form-dot yellow"></span>
+            <span class="form-dot green"></span>
+            <span class="form-title">new-message</span>
+          </div>
+          <form class="terminal-form" id="signal-form">
+            <div class="form-field">
+              <label for="sender-name" class="font-mono">Name</label>
+              <input
+                type="text"
+                id="sender-name"
+                name="name"
+                required
+                placeholder="Your name"
+                class="form-input font-mono"
+              />
+            </div>
+
+            <div class="form-field">
+              <label for="sender-email" class="font-mono">Email</label>
+              <input
+                type="email"
+                id="sender-email"
+                name="email"
+                required
+                placeholder="you@example.com"
+                class="form-input font-mono"
+              />
+            </div>
+
+            <div class="form-field">
+              <label for="sender-message" class="font-mono">Message</label>
+              <textarea
+                id="sender-message"
+                name="message"
+                rows="6"
+                required
+                placeholder="Tell me about your project…"
+                class="form-textarea font-mono"></textarea>
+            </div>
+
+            <button type="submit" class="submit-btn font-mono" id="form-submit-btn">
+              <span>Send message</span>
+            </button>
+          </form>
+          <div id="form-status-log" class="form-status-log font-mono" style="display: none;">
+            <div class="status-line info">Composing your message…</div>
+            <div class="status-line info">Opening your mail client…</div>
+            <div class="status-line success">
+              Your email app should now be open — hit send to finish.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Column: System Comm Channels & Terminal Outputs -->
+      <div class="contact-right" id="contact-channels-column">
+        <h2 class="section-title">02. Details</h2>
+
+        <div class="technical-parameters" id="contact-params-table">
+          <h3 class="subsection-title">Reach me at</h3>
+          <div class="param-row">
+            <span class="param-name">Email</span>
+            <span class="param-val">
+              <a href="mailto:christian.doobi@gmail.com" class="tech-link"
+                >christian.doobi@gmail.com</a
+              >
+            </span>
+          </div>
+          <div class="param-row">
+            <span class="param-name">GitHub</span>
+            <span class="param-val">
+              <a
+                href="https://github.com/cristian-dubineanschi"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="tech-link">github.com/cristian-dubineanschi</a
+              >
+            </span>
+          </div>
+          <div class="param-row">
+            <span class="param-name">Location</span>
+            <span class="param-val">Cluj-Napoca, RO</span>
+          </div>
+          <div class="param-row">
+            <span class="param-name">Timezone</span>
+            <span class="param-val">UTC+2 — Eastern Europe</span>
+          </div>
+        </div>
+
+        <div class="code-terminal" id="contact-diag-term">
+          <div class="terminal-header">
+            <div class="terminal-buttons">
+              <span class="terminal-dot red"></span>
+              <span class="terminal-dot yellow"></span>
+              <span class="terminal-dot green"></span>
+            </div>
+            <span class="terminal-title">status</span>
+          </div>
+          <div class="terminal-body font-mono text-glow">
+            <div class="diag-line">Available for selected work</div>
+            <div class="diag-line">Typically replies within 48 hours</div>
+            <div class="diag-line">Based in Cluj-Napoca, RO (UTC+2)</div>
+            <div class="diag-line">Email & GitHub open</div>
+            <div class="diag-line blink-cursor">▋</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</Layout>
+
+<script>
+  // Where messages are delivered. To use a hosted form backend instead of the
+  // visitor's mail client, swap this handler for a fetch() to Formspree/Web3Forms.
+  const CONTACT_EMAIL = "christian.doobi@gmail.com";
+
+  function setupFormSubmit() {
+    const form = document.getElementById("signal-form") as HTMLFormElement;
+    const statusLog = document.getElementById("form-status-log");
+    const submitBtn = document.getElementById("form-submit-btn");
+
+    if (!form || !statusLog || !submitBtn) return;
+
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+
+      const data = new FormData(form);
+      const name = String(data.get("name") || "").trim();
+      const email = String(data.get("email") || "").trim();
+      const message = String(data.get("message") || "").trim();
+
+      // Build a real mailto: so the message actually reaches an inbox.
+      const subject = `Portfolio enquiry — ${name || "no name"}`;
+      const body = `${message}\n\n— ${name}\n${email}`;
+      const mailto = `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent(
+        subject,
+      )}&body=${encodeURIComponent(body)}`;
+
+      statusLog.style.display = "flex";
+      submitBtn.setAttribute("disabled", "true");
+
+      window.location.href = mailto;
+
+      // Re-enable so the visitor can retry or edit if their client didn't open.
+      setTimeout(() => {
+        statusLog.style.display = "none";
+        submitBtn.removeAttribute("disabled");
+      }, 6000);
+    });
+  }
+
+  setupFormSubmit();
+  document.addEventListener("astro:after-swap", setupFormSubmit);
+</script>
+
+<style>
+  .contact-container {
+    padding-top: 3rem;
+    padding-bottom: 5rem;
+  }
+
+  /* Page Header */
+  .contact-header {
+    margin-bottom: 3rem;
+  }
+  .header-line {
+    height: 2px;
+    background: linear-gradient(to right, var(--color-accent), transparent);
+    margin-bottom: 1rem;
+  }
+  .system-code {
+    font-family: var(--font-mono);
+    font-size: 0.76rem;
+    color: var(--color-accent);
+    letter-spacing: 0.1em;
+  }
+  .page-title {
+    font-size: clamp(1.9rem, 4vw, 3rem);
+    font-weight: 400;
+    margin-top: 0.5rem;
+    letter-spacing: -0.03em;
+    line-height: 1;
+  }
+
+  /* Layout Grid */
+  .contact-grid {
+    display: grid;
+    grid-template-columns: 1.25fr 1.1fr;
+    gap: 4rem;
+  }
+
+  .section-title {
+    font-family: var(--font-sans);
+    font-size: 0.95rem;
+    font-weight: 800;
+    color: var(--color-text);
+    border-bottom: 1px solid var(--color-border);
+    padding-bottom: 0.75rem;
+    margin-bottom: 1.5rem;
+    letter-spacing: 0.05em;
+  }
+
+  /* Terminal Form styling */
+  .terminal-form-box {
+    border: 1px solid var(--color-terminal-border);
+    background-color: var(--color-terminal-bg);
+    border-radius: 4px;
+    overflow: hidden;
+    transition: border-color 0.3s ease;
+  }
+  .terminal-form-box:hover {
+    border-color: rgba(139, 111, 196, 0.3);
+  }
+  .terminal-form-header {
+    background-color: var(--color-terminal-hdr);
+    padding: 0.75rem 1rem;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    border-bottom: 1px solid var(--color-terminal-border);
+  }
+  .form-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: var(--color-terminal-border);
+  }
+  .form-dot.red {
+    background-color: #ef4444;
+  }
+  .form-dot.yellow {
+    background-color: #eab308;
+  }
+  .form-dot.green {
+    background-color: #22c55e;
+  }
+  .form-title {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    color: var(--color-terminal-muted);
+    margin-left: 8px;
+    letter-spacing: 0.05em;
+  }
+  .terminal-form {
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+  }
+  .form-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .form-field label {
+    font-size: 0.76rem;
+    color: var(--color-terminal-accent);
+    letter-spacing: 0.05em;
+  }
+  .form-input,
+  .form-textarea {
+    background-color: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--color-terminal-border);
+    color: var(--color-terminal-text);
+    padding: 0.75rem;
+    border-radius: 4px;
+    font-size: 0.82rem;
+    outline: none;
+    transition:
+      border-color 0.3s ease,
+      box-shadow 0.3s ease;
+  }
+  .form-input::placeholder,
+  .form-textarea::placeholder {
+    color: var(--color-terminal-muted);
+    opacity: 0.5;
+  }
+  .form-input:focus,
+  .form-textarea:focus {
+    border-color: var(--color-terminal-accent);
+    box-shadow: 0 0 10px rgba(139, 111, 196, 0.15);
+  }
+  .submit-btn {
+    background: none;
+    border: 1px solid var(--color-terminal-accent);
+    color: var(--color-terminal-accent);
+    padding: 0.75rem 1.5rem;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.82rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    margin-top: 0.5rem;
+  }
+  .submit-btn:hover {
+    background-color: var(--color-terminal-accent);
+    color: #000000;
+    border-color: var(--color-terminal-accent);
+    box-shadow: 0 0 15px rgba(139, 111, 196, 0.35);
+  }
+  .submit-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    border-color: var(--color-terminal-border);
+    color: var(--color-terminal-muted);
+  }
+
+  /* Status log */
+  .form-status-log {
+    padding: 0 1.5rem 1.5rem 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .status-line {
+    font-size: 0.76rem;
+    line-height: 1.4;
+  }
+  .status-line.info {
+    color: var(--color-terminal-muted);
+  }
+  .status-line.success {
+    color: var(--color-terminal-success);
+    font-weight: 700;
+  }
+
+  /* Right Column details */
+  .technical-parameters {
+    border: 1px solid var(--color-border);
+    background-color: var(--color-card-bg);
+    padding: 1.5rem;
+    border-radius: 4px;
+    margin-bottom: 2rem;
+    transition:
+      background-color 0.4s ease,
+      border-color 0.4s ease;
+  }
+  .subsection-title {
+    font-family: var(--font-mono);
+    font-size: 0.82rem;
+    color: var(--color-accent);
+    margin-bottom: 1rem;
+    letter-spacing: 0.05em;
+  }
+  .param-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid var(--color-border);
+  }
+  .param-row:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+  }
+  .param-name {
+    font-family: var(--font-mono);
+    font-size: 0.82rem;
+    color: var(--color-muted);
+    font-weight: 500;
+  }
+  .param-val {
+    font-family: var(--font-mono);
+    font-size: 0.82rem;
+    color: var(--color-text);
+    text-align: right;
+  }
+  .tech-link {
+    color: var(--color-accent);
+    font-weight: 600;
+  }
+  .tech-link:hover {
+    text-decoration: underline;
+    text-shadow: var(--color-nav-glow);
+  }
+  .pgp-key {
+    letter-spacing: 0.05em;
+    font-size: 0.72rem;
+    color: var(--color-muted-lavender);
+  }
+
+  .diag-line {
+    font-size: 0.82rem;
+    line-height: 1.6;
+    color: var(--color-terminal-text);
+  }
+
+  /* Responsive Design */
+  @media (max-width: 1024px) {
+    .contact-grid {
+      grid-template-columns: 1fr;
+      gap: 3rem;
+    }
+  }
+  @media (max-width: 768px) {
+    .contact-container {
+      padding-top: 1.5rem;
+    }
+  }
+</style>
