@@ -1,122 +1,85 @@
 # Cristian Dubineanschi — Portfolio
 
-Portfolio for an interactive media artist: installations, light systems, and
-visual design. Built with **Astro 6** (static, zero-JS by default) and deployed
-to GitHub Pages.
+Portfolio of an interactive media artist: light and sound installations, spatial
+systems, and visual design. Live at **https://isaac-doobs.github.io**.
 
----
+A static site built with Astro — no client framework, no backend. Each project is a
+Markdown file compiled to HTML at build time.
 
-## 1. Visual direction
+## Stack
 
-Brutalist-editorial: monochrome base with a single muted-violet accent.
+- **Astro 6** — static generation, zero JavaScript shipped by default
+- **Content Collections** — projects authored as Markdown under `src/content/projects/`, validated against a typed schema
+- **View Transitions** for client-side navigation
+- **Self-hosted type** — Space Grotesk, Inter, and Space Mono via `@fontsource`; no external CDN
+- **SEO** — `@astrojs/sitemap`, canonical and Open Graph tags, schema.org `Person` JSON-LD
+- Light and dark themes, persisted to `localStorage` and applied before first paint
 
-- **Palette:** near-black ink on off-white paper (dark theme) / warm bone paper
-  (light theme). Accent `#8b6fc4` (dark) / `#5f4a93` (light), used sparingly.
-- **Typography:** Space Grotesk (display/sans) + Inter (body) + Space Mono
-  (labels/code). **Self-hosted via `@fontsource`** — no external font CDN.
-- **Motion:** a Swiss column grid, cursor-reactive grid dots, a particle cursor,
-  scroll reveals, and a film-grain overlay — all gated behind
-  `prefers-reduced-motion` and disabled on touch / small screens.
-
-Theme is persisted to `localStorage` under `system-theme`; an inline script in
-`Layout.astro` sets it before paint to avoid a flash.
-
----
-
-## 2. Stack
-
-- **Framework:** [Astro v6](https://astro.build/) — static HTML generation.
-- **Content:** Astro Content Collections from local Markdown in
-  `src/content/projects/` (see `src/content.config.ts` for the schema).
-- **Transitions:** native View Transitions via `<ClientRouter />`.
-- **Code highlighting:** built-in Shiki (`<Code />`).
-- **SEO:** `@astrojs/sitemap`, `public/robots.txt`, canonical + Open Graph tags,
-  and schema.org `Person` JSON-LD in `Layout.astro`.
-
----
-
-## 3. Media
-
-Project hero/gallery media lives in frontmatter (`videoUrl`, `thumbnailUrl`,
-`mediaGallery`). Paths starting with `/assets/...` are served from `public/`;
-full URLs are loaded as-is.
-
-- **Heavy video is not auto-loaded in the gallery grid.** A lightweight poster
-  still is shown (convention: same path with `_poster.jpg`, e.g.
-  `bio-sonic-dust.mp4` → `bio-sonic-dust_poster.jpg`) and the full clip — with
-  sound — is fetched only when the visitor opens the lightbox.
-- `public/assets/projects/bio-sonic-dust.mp4` is committed in-repo (H.264 +
-  AAC, 1280×720, ~21 MB). Keep large originals out of the repo where possible;
-  GitHub Pages has a monthly bandwidth limit.
-- ⚠️ Several projects currently point at **mixkit.co stock clips** as
-  placeholders — replace these with real documentation before sharing widely.
-
----
-
-## 4. Add a new project
-
-Create `src/content/projects/<category>/<slug>.md` (the folder is `design` or
-`interactive`; the public URL is always the flat slug, `/projects/<slug>`).
-
-Required + optional frontmatter (must satisfy `src/content.config.ts`):
-
-```markdown
----
-title: "PROJECT NAME"
-category: "Interactive" # required — "Interactive" | "Design"
-year: 2026 # required (number)
-status: "Operational" # required — Operational | Active | Archived | In Development
-medium: # required
-  - "Primary Medium"
-  - "Secondary Medium"
-concept: "One paragraph on the concept, installation, and themes." # required
-software: ["Software A", "Software B"] # required
-hardware: ["Hardware A"] # required
-inputs: ["Sensor Input A"] # required
-videoUrl: "/assets/projects/your-hero.jpg" # required (.mp4 → <video>, image → <img>)
-thumbnailUrl: "/assets/projects/your-hero.jpg" # required
-# --- optional ---
-academicContext: "Course / program context."
-process: ["Step one", "Step two"]
-challenges: "Problems and how they were solved."
-researchRelevance: "How it connects to the research theme."
-mediaGallery: ["/assets/projects/shot_01.jpg", "/assets/projects/clip.mp4"]
-blueprintUrl: "/assets/your_blueprint.png"
-blueprintCaption: "System signal flow v1.0"
-codeLanguage: "python" # default: "javascript"
-codeSnippet: |
-  def main():
-      pass
----
-
-Any Markdown placed below the frontmatter renders under the Concept block.
-```
-
----
-
-## 5. Development
+## Development
 
 ```bash
-npm run dev   # Astro dev server → http://localhost:4321
-npm run build # static production build → dist/
-npm run preview
-npm run format        # Prettier write
-npm run format:check  # Prettier check
+npm install
+npm run dev       # dev server at http://localhost:4321
+npm run build     # static build → dist/
+npm run preview   # serve the production build locally
+npm run format    # Prettier
 ```
 
-Open `http://localhost:4321/`. Project content is edited directly in the
-Markdown files under `src/content/projects/` (see §4).
+Requires Node 22.12 or newer.
 
+## Structure
+
+```
+src/
+├─ content/projects/      project entries — interactive/ and design/ (the site's content)
+├─ pages/                 routes: index, about, contact, projects/[id]
+├─ layouts/Layout.astro   page shell — head, navigation, theme, fonts, motion
+└─ styles/global.css      design tokens and base styles
+public/assets/projects/   hero and gallery media
+```
+
+Projects sit in `interactive/` or `design/` for organisation only; each resolves to a
+flat URL, `/projects/<slug>`.
+
+## Adding a project
+
+Create `src/content/projects/<interactive|design>/<slug>.md`. The frontmatter is
+validated against `src/content.config.ts`:
+
+```yaml
+---
+title: "Project Name"
+category: "Interactive"          # "Interactive" or "Design"
+year: 2026
+status: "Exhibited"
+medium: ["Light Installation", "Sound"]
+concept: "A paragraph framing the work, its idea, and the space it occupies."
+software: ["TouchDesigner"]
+hardware: ["ESP32", "Addressable LEDs"]
+inputs: ["Two voice signals"]
+videoUrl: "/assets/projects/<slug>_01.jpg"      # image, or .mp4 for video
+thumbnailUrl: "/assets/projects/<slug>_01.jpg"
+
+# optional
+academicContext: "Program or exhibition context."
+process: ["First step", "Second step"]
+challenges: "What was hard, and how it was resolved."
+researchRelevance: "How the work connects to a wider line of inquiry."
+mediaGallery: ["/assets/projects/<slug>_02.jpg", "/assets/projects/<slug>_03.jpg"]
+blueprintUrl: "/assets/<slug>_blueprint.jpg"
+blueprintCaption: "Spatial layout and sensor mapping."
 ---
 
-## 6. Deployment (GitHub Pages)
+Anything below the frontmatter renders as the project's detailed narrative.
+```
 
-Pushing to `main` triggers `.github/workflows/deploy.yml`, which builds the site
-and publishes `dist/` via GitHub Actions. In the repo: **Settings → Pages →
-Build and deployment → Source: GitHub Actions.**
+**Media.** Gallery tiles show a still; full video loads only when a visitor opens the
+lightbox. For a video `clip.mp4`, place a matching poster named `clip_poster.jpg`
+beside it.
 
-**Before deploying, confirm `site` in `astro.config.mjs`.** It's currently
-`https://isaac-doobs.github.io` (a root user page). If you use a custom
-domain or a project page (`username.github.io/repo-name`), update `site` (and set
-`base`) or canonical / OG / sitemap URLs will be wrong. Also update the `Sitemap:`
-line in `public/robots.txt` to match.
+## Deployment
+
+Every push to `main` triggers `.github/workflows/deploy.yml`, which builds the site and
+publishes `dist/` to GitHub Pages. The canonical URL comes from `site` in
+`astro.config.mjs` (`https://isaac-doobs.github.io`); if it changes, update the
+`Sitemap:` line in `public/robots.txt` to match.
