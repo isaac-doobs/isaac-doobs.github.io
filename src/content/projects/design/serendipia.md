@@ -27,8 +27,6 @@ videoUrl: "/assets/projects/serendipia_01.jpg"
 thumbnailUrl: "/assets/projects/serendipia_01.jpg"
 mediaGallery:
   - "/assets/projects/serendipia_01.jpg"
-blueprintUrl: "/assets/chronos_blueprint.png"
-blueprintCaption: "Exhibition Poster Grid System & Typography Mockup (v1.0)"
 codeLanguage: "css"
 codeSnippet: |
   /* Serendipia: Exhibition branding styles */

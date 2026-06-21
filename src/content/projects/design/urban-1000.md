@@ -27,8 +27,6 @@ videoUrl: "/assets/projects/urban-1000_01.jpg"
 thumbnailUrl: "/assets/projects/urban-1000_01.jpg"
 mediaGallery:
   - "/assets/projects/urban-1000_01.jpg"
-blueprintUrl: "/assets/aperture_blueprint.png"
-blueprintCaption: "Landing Page Grid Layout & Content Hierarchy Wireframe (v1.0)"
 codeLanguage: "javascript"
 codeSnippet: |
   // Urban 1000 Explorer: Figma tokens mapping

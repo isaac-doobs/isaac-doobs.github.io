@@ -37,7 +37,7 @@ const personLd = {
     addressLocality: "Cluj-Napoca",
     addressCountry: "RO",
   },
-  sameAs: ["https://github.com/cristian-dubineanschi"],
+  sameAs: ["https://github.com/isaac-doobs"],
 };
 ---
 
@@ -126,7 +126,6 @@ const personLd = {
           <a href="/" class="nav-link active" id="nav-link-terminal">Works</a>
           <a href="/about" class="nav-link" id="nav-link-about">About</a>
           <a href="/contact" class="nav-link" id="nav-link-contact">Contact</a>
-          <a href="/admin" class="nav-link" id="nav-link-admin" style="display: none;">Control</a>
 
           <button id="theme-toggle" class="theme-toggle-btn" aria-label="Toggle theme">
             <span class="toggle-indicator-light"></span>
@@ -268,17 +267,6 @@ const personLd = {
           progressFill.style.width = `${progress}%`;
           progressPercent.textContent = String(progress).padStart(2, "0");
         }, 60);
-      }
-
-      function setupAdminVisibility() {
-        const adminLink = document.getElementById("nav-link-admin");
-        if (!adminLink) return;
-
-        if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") {
-          adminLink.style.display = "inline-block";
-        } else {
-          adminLink.style.display = "none";
-        }
       }
 
       // Active link highlight script
@@ -798,7 +786,6 @@ const personLd = {
         setupThemeToggle();
         setupOscilloscope();
         setupBootLoader();
-        setupAdminVisibility();
         setupActiveNav();
         setupCustomCursor();
         setupGridDots();

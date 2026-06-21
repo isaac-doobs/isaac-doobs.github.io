@@ -33,7 +33,6 @@ videoUrl: "/assets/projects/bio-sonic-dust_hero.jpg"
 thumbnailUrl: "/assets/projects/bio-sonic-dust_hero.jpg"
 mediaGallery:
   - "/assets/projects/bio-sonic-dust.mp4"
-  - "/assets/projects/bio-sonic-dust_01.jpg"
 codeLanguage: "python"
 codeSnippet: |
   # Bio-Sonic Dust: Kinect Joint Tracker & OSC Transmitter

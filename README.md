@@ -92,27 +92,20 @@ codeSnippet: |
 Any Markdown placed below the frontmatter renders under the Concept block.
 ```
 
-You can also use the local visual editor (see below).
-
 ---
 
 ## 5. Development
 
 ```bash
-npm run dev   # CMS daemon (port 4322) + Astro dev server (port 4321)
+npm run dev   # Astro dev server → http://localhost:4321
 npm run build # static production build → dist/
 npm run preview
 npm run format        # Prettier write
 npm run format:check  # Prettier check
 ```
 
-Open `http://localhost:4321/`.
-
-**Local authoring console** lives at `/admin` and a per-page "Edit live" HUD on
-project pages. Both are **localhost-only**: the admin route redirects to `/` in
-production builds, the HUD is stripped from the production bundle, and edits are
-written to disk by `scripts/cms-server.js` (port 4322). If you hit
-`EADDRINUSE: 4322`, run `lsof -ti:4322 | xargs kill`.
+Open `http://localhost:4321/`. Project content is edited directly in the
+Markdown files under `src/content/projects/` (see §4).
 
 ---
 
@@ -123,7 +116,7 @@ and publishes `dist/` via GitHub Actions. In the repo: **Settings → Pages →
 Build and deployment → Source: GitHub Actions.**
 
 **Before deploying, confirm `site` in `astro.config.mjs`.** It's currently
-`https://cristian-dubineanschi.github.io` (a root user page). If you use a custom
+`https://isaac-doobs.github.io` (a root user page). If you use a custom
 domain or a project page (`username.github.io/repo-name`), update `site` (and set
 `base`) or canonical / OG / sitemap URLs will be wrong. Also update the `Sitemap:`
 line in `public/robots.txt` to match.

@@ -4,7 +4,7 @@ import Layout from "../layouts/Layout.astro";
 
 <Layout
   title="About — Cristian Dubineanschi"
-  description="Technical profile, interactive media toolsets, and professional resume of Cristian Dubineanschi."
+  description="Interdisciplinary artist and visual designer in Cluj-Napoca, working with digital systems, interactive media, and design."
 >
   <div class="about-container container" id="about-main-container">
     <!-- Page Header -->
@@ -21,45 +21,31 @@ import Layout from "../layouts/Layout.astro";
         <h2 class="section-title">01. Practice</h2>
         <div class="bio-text">
           <p>
-            I am an interdisciplinary artist and visual designer whose practice operates at the
-            intersection of digital culture, technology, and contemporary aesthetics. Based in
-            Cluj-Napoca, Romania, I explore the translation of complex, often invisible
-            infrastructures—such as platforms, algorithms, and data streams—into visual,
-            interactive, and experiential forms.
+            I'm an interdisciplinary artist and visual designer based in Cluj-Napoca, Romania. I
+            work with the parts of digital life most people never see, like platforms, algorithms,
+            and the data moving underneath them, and I turn them into things you can look at and
+            interact with.
           </p>
           <p>
-            Rather than treating mediums as fixed categories, I approach them as tools for critical
-            inquiry, emphasizing process, speculation, and reflection. My work investigates how
-            abstract digital systems shape human behavior, perception, and collective imagination,
-            positioning design as both a communicative and critical act.
+            I don't think of a medium as a fixed category. My process is rooted in play and inquiry:
+            I experiment with new tools and raw data and let the form surface on its own. I look for
+            sense in the abstract and complexity in the simple. The question I keep coming back to:
+            how do these systems shape what we do, what we notice, and what we think is possible?
+            For me design isn't only a way to explain something. It can also make an argument.
           </p>
           <p>
-            Currently pursuing my Master's degree in Digital Interactive Arts at Babeș-Bolyai
-            University, Faculty of Theatre and Film, my work centers on collective and
-            cross-disciplinary frameworks, exploring the tension between clarity and ambiguity
-            within digital experiences.
+            Right now I'm doing a Master's in Digital Interactive Arts at Babeș-Bolyai University,
+            in the Faculty of Theatre and Film, where most of my work is collective and
+            cross-disciplinary. I keep circling one tension: when a digital experience should be
+            clear, and when it's better off staying ambiguous.
           </p>
         </div>
 
-        <div class="technical-parameters" id="tech-params-table">
-          <h3 class="subsection-title">Tools & methods</h3>
-          <div class="param-row">
-            <span class="param-name">Creative Coding</span>
-            <span class="param-val">TouchDesigner, Max/MSP, Kinect gesture mapping</span>
-          </div>
-          <div class="param-row">
-            <span class="param-name">Design & Visuals</span>
-            <span class="param-val">UI/UX (Figma), Blender, Adobe CC (Illustrator, Photoshop)</span>
-          </div>
-          <div class="param-row">
-            <span class="param-name">Web & Digital</span>
-            <span class="param-val">Webflow, HTML/CSS, InVision, Git</span>
-          </div>
-          <div class="param-row">
-            <span class="param-name">Interactivity</span>
-            <span class="param-val">Kinect sensors, addressable LED systems, AR development</span>
-          </div>
-        </div>
+        <p class="bio-cta">
+          If any of this resonates, I'd like to hear from you, whether that's working on something
+          together, a commission, showing the work, or just a conversation.
+          <a href="/contact">Get in touch →</a>
+        </p>
       </div>
 
       <!-- Right Column: System Specs & History Log -->
@@ -347,6 +333,20 @@ import Layout from "../layouts/Layout.astro";
     margin-bottom: 1.5rem;
     font-size: 0.92rem;
     line-height: 1.8;
+  }
+
+  .bio-cta {
+    margin-top: 2rem;
+    font-size: 0.92rem;
+    line-height: 1.8;
+  }
+  .bio-cta a {
+    color: var(--color-accent);
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .bio-cta a:hover {
+    text-decoration: underline;
   }
 
   .subsection-title {
