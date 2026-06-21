@@ -62,16 +62,28 @@ import Layout from "../layouts/Layout.astro";
                 class="form-textarea font-mono"></textarea>
             </div>
 
+            <!-- Honeypot: hidden from people; bots that fill it are dropped. -->
+            <input
+              type="text"
+              name="botcheck"
+              id="botcheck"
+              class="hp-field"
+              tabindex="-1"
+              autocomplete="off"
+              aria-hidden="true"
+            />
+
             <button type="submit" class="submit-btn font-mono" id="form-submit-btn">
               <span>Send message</span>
             </button>
           </form>
-          <div id="form-status-log" class="form-status-log font-mono" style="display: none;">
-            <div class="status-line info">Composing your message…</div>
-            <div class="status-line info">Opening your mail client…</div>
-            <div class="status-line success">
-              Your email app should now be open — hit send to finish.
-            </div>
+          <div
+            id="form-status-log"
+            class="form-status-log font-mono"
+            style="display: none;"
+            role="status"
+            aria-live="polite"
+          >
           </div>
         </div>
       </div>
@@ -123,42 +135,87 @@ import Layout from "../layouts/Layout.astro";
 </Layout>
 
 <script>
-  // Where messages are delivered. To use a hosted form backend instead of the
-  // visitor's mail client, swap this handler for a fetch() to Formspree/Web3Forms.
+  // Web3Forms delivers the submission to your inbox without a backend. Get a
+  // free access key at https://web3forms.com (enter your email — it's sent to
+  // you instantly) and paste it below. The key is public/client-side by design;
+  // spam is filtered by the honeypot field and Web3Forms' own checks.
+  const ACCESS_KEY = "c8d52298-8513-4f59-b149-3b83927c8d8f";
+  const ENDPOINT = "https://api.web3forms.com/submit";
   const CONTACT_EMAIL = "christian.doobi@gmail.com";
 
-  function setupFormSubmit() {
-    const form = document.getElementById("signal-form") as HTMLFormElement;
-    const statusLog = document.getElementById("form-status-log");
-    const submitBtn = document.getElementById("form-submit-btn");
+  type StatusLine = { text: string; kind?: "info" | "success" | "error" };
 
+  function setupFormSubmit() {
+    const form = document.getElementById("signal-form") as HTMLFormElement | null;
+    const statusLog = document.getElementById("form-status-log");
+    const submitBtn = document.getElementById("form-submit-btn") as HTMLButtonElement | null;
     if (!form || !statusLog || !submitBtn) return;
 
-    form.addEventListener("submit", (e) => {
+    const btnLabel = submitBtn.querySelector("span");
+
+    const setStatus = (lines: StatusLine[]) => {
+      statusLog.innerHTML = lines
+        .map((l) => `<div class="status-line ${l.kind ?? "info"}">${l.text}</div>`)
+        .join("");
+      statusLog.style.display = "flex";
+    };
+
+    form.addEventListener("submit", async (e) => {
       e.preventDefault();
 
       const data = new FormData(form);
+
+      // Honeypot tripped → almost certainly a bot. Feign success, send nothing.
+      if (String(data.get("botcheck") || "").length > 0) {
+        setStatus([{ text: "Message sent. Thanks — I'll be in touch.", kind: "success" }]);
+        form.reset();
+        return;
+      }
+
       const name = String(data.get("name") || "").trim();
       const email = String(data.get("email") || "").trim();
       const message = String(data.get("message") || "").trim();
 
-      // Build a real mailto: so the message actually reaches an inbox.
-      const subject = `Portfolio enquiry — ${name || "no name"}`;
-      const body = `${message}\n\n— ${name}\n${email}`;
-      const mailto = `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent(
-        subject,
-      )}&body=${encodeURIComponent(body)}`;
+      submitBtn.disabled = true;
+      if (btnLabel) btnLabel.textContent = "Sending…";
+      setStatus([{ text: "Transmitting message…", kind: "info" }]);
 
-      statusLog.style.display = "flex";
-      submitBtn.setAttribute("disabled", "true");
+      try {
+        const res = await fetch(ENDPOINT, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Accept: "application/json" },
+          body: JSON.stringify({
+            access_key: ACCESS_KEY,
+            name,
+            email,
+            message,
+            subject: `Portfolio enquiry — ${name || "no name"}`,
+            from_name: "Portfolio contact form",
+          }),
+        });
+        const result = await res.json();
 
-      window.location.href = mailto;
-
-      // Re-enable so the visitor can retry or edit if their client didn't open.
-      setTimeout(() => {
-        statusLog.style.display = "none";
-        submitBtn.removeAttribute("disabled");
-      }, 6000);
+        if (res.ok && result.success) {
+          setStatus([
+            { text: "Message sent.", kind: "success" },
+            { text: "Thanks — I'll reply within ~48 hours.", kind: "info" },
+          ]);
+          form.reset();
+        } else {
+          setStatus([
+            { text: "Couldn't send — please try again.", kind: "error" },
+            { text: `Or email me directly: ${CONTACT_EMAIL}`, kind: "info" },
+          ]);
+        }
+      } catch {
+        setStatus([
+          { text: "Network error — message not sent.", kind: "error" },
+          { text: `Email me directly: ${CONTACT_EMAIL}`, kind: "info" },
+        ]);
+      } finally {
+        submitBtn.disabled = false;
+        if (btnLabel) btnLabel.textContent = "Send message";
+      }
     });
   }
 
@@ -341,6 +398,15 @@ import Layout from "../layouts/Layout.astro";
     color: var(--color-terminal-success);
     font-weight: 700;
   }
+  .status-line.error {
+    color: #f87171;
+    font-weight: 700;
+  }
+
+  /* Honeypot — visually and from-flow hidden, but present for bots to fill. */
+  .hp-field {
+    display: none;
+  }
 
   /* Right Column details */
   .technical-parameters {
@@ -466,6 +532,9 @@ import Layout from "../layouts/Layout.astro";
   }
   :root[data-theme="light"] .status-line.success {
     color: var(--color-accent);
+  }
+  :root[data-theme="light"] .status-line.error {
+    color: #c0392b;
   }
   :root[data-theme="light"] #contact-diag-term .terminal-body {
     background-color: var(--color-card-bg);
