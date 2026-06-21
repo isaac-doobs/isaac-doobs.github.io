@@ -1,5 +1,5 @@
 /* Global CSS Design System — Brutalist Editorial (monochrome + 1 accent) */
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap");
+/* Fonts are self-hosted via @fontsource (imported in Layout.astro) — no external CDN. */
 
 :root {
   /* Monochrome base — near-black ink, off-white paper */
@@ -40,8 +40,9 @@
   --grid-opacity: 0.16;
   --scanline-opacity: 0;
 
-  --font-sans: "Space Grotesk", "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
-  --font-body: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-sans:
+    "Space Grotesk Variable", "Inter Variable", -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-body: "Inter Variable", -apple-system, BlinkMacSystemFont, sans-serif;
   --font-mono: "Space Mono", "Fira Code", Monaco, monospace;
 
   --grid-size: 80px;
@@ -163,15 +164,6 @@ body::after {
   display: none;
 }
 
-@keyframes scan {
-  0% {
-    transform: translateY(-100vh);
-  }
-  100% {
-    transform: translateY(100vh);
-  }
-}
-
 /* Custom Scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
@@ -239,11 +231,6 @@ a {
   transition:
     color 0.2s cubic-bezier(0.16, 1, 0.3, 1),
     border-color 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-/* Glowing text utility */
-.glow-text {
-  text-shadow: none;
 }
 
 .glow-border {
@@ -365,97 +352,6 @@ a {
   background-color: #22c55e;
 }
 
-/* ----------------------------------------------------
-   Creative CRT Reboot / Glitch Overlay styles
-   ---------------------------------------------------- */
-.reboot-overlay {
-  position: fixed;
-  inset: 0;
-  background-color: var(--color-bg);
-  z-index: 99999;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.1s ease;
-}
-
-.reboot-overlay.active {
-  opacity: 1;
-  pointer-events: all;
-  animation: glitch-flash 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-
-.reboot-content {
-  color: var(--color-accent);
-  font-size: 0.8rem;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  text-shadow: 0 0 5px var(--color-accent);
-}
-
-.reboot-line {
-  font-family: var(--font-mono);
-  overflow: hidden;
-  white-space: nowrap;
-  border-right: 2px solid var(--color-accent);
-  width: 0;
-  animation: typing 0.15s steps(20, end) forwards;
-}
-
-.reboot-line:nth-child(2) {
-  animation-delay: 0.1s;
-}
-
-.reboot-line:nth-child(3) {
-  animation-delay: 0.2s;
-}
-
-.reboot-line:nth-child(4) {
-  animation-delay: 0.3s;
-}
-
-@keyframes typing {
-  from {
-    width: 0;
-  }
-  to {
-    width: 100%;
-    border-color: transparent;
-  }
-}
-
-@keyframes glitch-flash {
-  0% {
-    opacity: 0;
-    filter: hue-rotate(0deg) invert(0);
-  }
-  5% {
-    opacity: 1;
-  }
-  15% {
-    opacity: 0.85;
-    filter: hue-rotate(90deg) invert(1);
-    background-color: var(--color-accent-dark);
-  }
-  25% {
-    opacity: 1;
-    filter: none;
-  }
-  70% {
-    opacity: 1;
-  }
-  85% {
-    opacity: 0.9;
-    filter: hue-rotate(-90deg) invert(0.5);
-  }
-  100% {
-    opacity: 0;
-  }
-}
-
 /* Theme Switcher Button Style */
 .theme-toggle-btn {
   background: none;
@@ -534,119 +430,6 @@ a {
   width: 90%;
   max-width: 500px;
   transition: all 0.5s cubic-bezier(0.85, 0, 0.15, 1);
-}
-
-.loader-terminal-box {
-  border: 1px solid var(--color-terminal-border);
-  background-color: var(--color-terminal-bg);
-  border-radius: 4px;
-  overflow: hidden;
-  box-shadow: 0 0 30px rgba(139, 111, 196, 0.05);
-}
-
-.loader-term-header {
-  background-color: var(--color-terminal-hdr);
-  padding: 0.6rem 1rem;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  border-bottom: 1px solid var(--color-terminal-border);
-}
-
-.loader-term-header .term-dot {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background-color: var(--color-terminal-border);
-}
-
-.loader-term-header .term-dot.red {
-  background-color: #ef4444;
-}
-
-.loader-term-header .term-dot.yellow {
-  background-color: #eab308;
-}
-
-.loader-term-header .term-dot.green {
-  background-color: #22c55e;
-}
-
-.loader-term-header .term-title {
-  font-family: var(--font-mono);
-  font-size: 0.65rem;
-  color: var(--color-terminal-muted);
-  margin-left: 8px;
-  letter-spacing: 0.05em;
-}
-
-/* Force dark-mode styled contents inside loader terminal to prevent contrast loss in light mode */
-.loader-terminal-box p,
-.loader-terminal-box span,
-.loader-terminal-box div {
-  color: var(--color-terminal-text);
-}
-
-.loader-term-header .term-title {
-  color: var(--color-terminal-muted);
-}
-
-.boot-log-line {
-  color: var(--color-terminal-muted);
-}
-
-.loader-term-body {
-  padding: 1.25rem;
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.boot-logs {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  min-height: 90px;
-  font-family: var(--font-mono);
-  font-size: 0.7rem;
-}
-
-.boot-log-line {
-  color: var(--color-muted-lavender);
-  line-height: 1.4;
-}
-
-.boot-log-line.success {
-  color: var(--color-success);
-}
-
-.progress-section {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  font-family: var(--font-mono);
-  font-size: 0.7rem;
-}
-
-.progress-text-row {
-  display: flex;
-  justify-content: space-between;
-  color: var(--color-muted);
-}
-
-.progress-bar {
-  height: 4px;
-  background-color: var(--color-border);
-  border-radius: 2px;
-  overflow: hidden;
-}
-
-.progress-fill {
-  height: 100%;
-  width: 0;
-  background-color: var(--color-accent);
-  box-shadow: 0 0 8px var(--color-accent);
-  transition: width 0.1s linear;
 }
 
 /* Trigger states */
@@ -798,36 +581,6 @@ a {
 
   .fx-grain {
     animation: none;
-  }
-}
-
-/* ---- Marquee ---- */
-.marquee {
-  width: 100%;
-  overflow: hidden;
-  white-space: nowrap;
-  -webkit-mask-image: linear-gradient(to right, transparent, #000 8%, #000 92%, transparent);
-  mask-image: linear-gradient(to right, transparent, #000 8%, #000 92%, transparent);
-}
-
-.marquee__track {
-  display: inline-flex;
-  align-items: center;
-  gap: 2.5rem;
-  animation: marquee-x 32s linear infinite;
-  will-change: transform;
-}
-
-.marquee:hover .marquee__track {
-  animation-play-state: paused;
-}
-
-@keyframes marquee-x {
-  from {
-    transform: translateX(0);
-  }
-  to {
-    transform: translateX(-50%);
   }
 }
 

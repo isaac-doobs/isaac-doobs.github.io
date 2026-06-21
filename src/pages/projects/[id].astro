@@ -300,7 +300,11 @@ const ogImage = [d.thumbnailUrl, ...(d.mediaGallery ?? [])].find((u) =>
           </div>
           <div class="gallery-grid">
             {d.mediaGallery.map((url) => {
-              const isVideo = url.endsWith(".mp4");
+              const isVideo = /\.(mp4|webm|mov)$/i.test(url);
+              // Heavy clips are not auto-loaded in the grid: we show a lightweight
+              // poster still (convention: same path with `_poster.jpg`) and only fetch
+              // the full video — with sound — when the visitor opens the lightbox.
+              const poster = url.replace(/\.(mp4|webm|mov)$/i, "_poster.jpg");
               return (
                 <button
                   type="button"
@@ -309,13 +313,12 @@ const ogImage = [d.thumbnailUrl, ...(d.mediaGallery ?? [])].find((u) =>
                   data-media-type={isVideo ? "video" : "image"}
                   aria-label={isVideo ? "Play video fullscreen" : "View image fullscreen"}
                 >
-                  {isVideo ? (
-                    <video autoplay muted loop playsinline class="gallery-img">
-                      <source src={url} type="video/mp4" />
-                    </video>
-                  ) : (
-                    <img src={url} alt="Visual documentation" class="gallery-img" loading="lazy" />
-                  )}
+                  <img
+                    src={isVideo ? poster : url}
+                    alt="Visual documentation"
+                    class="gallery-img"
+                    loading="lazy"
+                  />
                   <span class="gallery-zoom" aria-hidden="true">
                     {isVideo ? "▶" : "⤢"}
                   </span>
@@ -360,15 +363,27 @@ const ogImage = [d.thumbnailUrl, ...(d.mediaGallery ?? [])].find((u) =>
     <a href="/" class="back-link" data-magnetic data-magnetic-strength="0.3">← All works</a>
   </div>
 
-  <!-- Live Edit HUD (Only visible on localhost) -->
-  <div id="live-edit-hud" class="live-edit-hud" style="display: none;">
-    <button id="live-edit-toggle-btn" class="hud-btn font-mono">[EDIT LIVE]</button>
-    <div id="hud-actions" class="hud-actions hidden">
-      <span id="hud-log" class="hud-status font-mono">>>> EDIT ACTIVE</span>
-      <button id="live-edit-save-btn" class="hud-btn save font-mono">[SAVE]</button>
-      <button id="live-edit-cancel-btn" class="hud-btn cancel font-mono">[CANCEL]</button>
-    </div>
-  </div>
+  {/* Live Edit HUD — authoring tool, only built into the local dev server */}
+  {
+    import.meta.env.DEV && (
+      <div id="live-edit-hud" class="live-edit-hud" style="display: none;">
+        <button id="live-edit-toggle-btn" class="hud-btn font-mono">
+          [EDIT LIVE]
+        </button>
+        <div id="hud-actions" class="hud-actions hidden">
+          <span id="hud-log" class="hud-status font-mono">
+            {">>> EDIT ACTIVE"}
+          </span>
+          <button id="live-edit-save-btn" class="hud-btn save font-mono">
+            [SAVE]
+          </button>
+          <button id="live-edit-cancel-btn" class="hud-btn cancel font-mono">
+            [CANCEL]
+          </button>
+        </div>
+      </div>
+    )
+  }
 
   <!-- ============ MEDIA LIGHTBOX ============ -->
   <div
@@ -385,11 +400,15 @@ const ogImage = [d.thumbnailUrl, ...(d.mediaGallery ?? [])].find((u) =>
     <div class="lightbox-stage" id="lightbox-stage"></div>
   </div>
 
-  <script
-    id="project-data-json"
-    type="application/json"
-    set:html={JSON.stringify({ id: project.id, data: project.data, body: project.body || "" })}
-  />
+  {
+    import.meta.env.DEV && (
+      <script
+        id="project-data-json"
+        type="application/json"
+        set:html={JSON.stringify({ id: project.id, data: project.data, body: project.body || "" })}
+      />
+    )
+  }
 </Layout>
 
 <script>
@@ -657,10 +676,20 @@ const ogImage = [d.thumbnailUrl, ...(d.mediaGallery ?? [])].find((u) =>
     });
   }
 
+  // Honour prefers-reduced-motion: freeze the looping hero background video.
+  function respectReducedMotion() {
+    if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    document.querySelectorAll<HTMLVideoElement>("video[autoplay]").forEach((v) => {
+      v.removeAttribute("autoplay");
+      v.pause();
+    });
+  }
+
   function init() {
     initTerminal();
     initLiveEdit();
     initGallery();
+    respectReducedMotion();
   }
 
   init();

@@ -23,8 +23,8 @@ hardware:
 inputs:
   - "Architectural Portfolio Assets"
   - "User Experience (UX) Persona Data"
-videoUrl: "https://assets.mixkit.co/videos/preview/mixkit-top-view-of-contemporary-co-working-space-34407-large.mp4"
-thumbnailUrl: "https://assets.mixkit.co/videos/preview/mixkit-top-view-of-contemporary-co-working-space-34407-large.mp4"
+videoUrl: "/assets/projects/jasper-properties_01.jpg"
+thumbnailUrl: "/assets/projects/jasper-properties_01.jpg"
 mediaGallery:
   - "/assets/projects/jasper-properties_01.jpg"
 blueprintUrl: "/assets/helios_blueprint.png"

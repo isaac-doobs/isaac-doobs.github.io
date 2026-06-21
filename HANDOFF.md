@@ -1,124 +1,84 @@
-# Session Handoff — 2026-06-16
+# Session Handoff — 2026-06-21
 
-Portfolio for Cristian Dubineanschi (Astro 6, deployed to GitHub Pages). This
-captures what changed this session, what's verified, and what's still open.
+Portfolio for Cristian Dubineanschi (Astro 6, GitHub Pages). This session ran a
+full audit, fixed the medium/low findings, restored the hero video's audio,
+replaced placeholder stock footage with real stills, and merged everything to
+`main` locally.
 
 ## TL;DR
 
-Tooling + content reorg + a frontend/UI pass. Everything builds clean
-(`npm run build`) and is Prettier-formatted (`npm run format:check` passes).
-Nothing has been committed yet — it's all in the working tree.
+All work is **committed and merged to `main`** (fast-forward from
+`editorial-retone-and-cleanup`). **Not pushed — no git remote is configured yet.**
+Build is clean (10 pages + sitemap), Prettier passes.
 
 ---
 
-## What changed
+## What changed this session
 
-### 1. Prettier setup (whole project)
+### Audit fixes (medium + low)
 
-- Added `prettier` + `prettier-plugin-astro` (devDependencies), `.prettierrc`,
-  `.prettierignore`.
-- Scripts: `npm run format` (write) and `npm run format:check` (CI-friendly).
-- Config: 2-space indent, 100 print width, double quotes.
-- Entire repo formatted (`.astro`, CSS, JS, TS, markdown, yaml, config).
+- **Admin out of production** — `/admin` redirects home in prod builds; the
+  per-page live-edit HUD + serialized project JSON are stripped from the prod
+  bundle via `import.meta.env.DEV`. Both still work on localhost.
+- **Self-hosted fonts** via `@fontsource` (Inter + Space Grotesk variable, Space
+  Mono 400/700) — removed the render-blocking Google Fonts `@import`; zero
+  third-party font requests. Font-family vars use the "… Variable" family names.
+- **Heavy gallery video no longer eager-loads** — shows a poster still
+  (convention: `*_poster.jpg`) and loads the full clip only in the lightbox.
+- **SEO** — `@astrojs/sitemap` (excludes `/admin`), `public/robots.txt`,
+  schema.org `Person` JSON-LD in `Layout.astro`.
+- **Magnetic-strength bug** fixed (`dataset.magneticStrength`).
+- **Reduced-motion** — the looping hero background video freezes when set.
+- **Page titles** ("About"/"Contact") no longer force-uppercased.
+- **"Senzori Kinect" → "Kinect sensors"** on the About page.
+- **Dead CSS removed** — `global.css` 885 → 637 lines.
+- **README rewritten** to match the current build + fixed the missing required
+  `category` field in the add-a-project template.
 
-### 2. Project content reorganised into category subfolders
+### Hero video audio restored
 
-```
-src/content/projects/
-├── design/        ← jasper-properties, serendipia, urban-1000
-└── interactive/   ← bio-sonic-dust, oracolul2000, rooted-structures
-```
+`public/assets/projects/bio-sonic-dust.mp4` was silent (prior compression
+dropped audio; git never held a version with sound). Re-muxed the original AAC
+(from `~/Downloads/Bio-Sonic Dust.mp4`) onto the already-compressed video without
+re-encoding the picture → H.264 + AAC stereo, ~21 MB, faststart. Plays with
+sound in the lightbox.
 
-- `src/content.config.ts` — added `generateId` so IDs stay flat (e.g.
-  `serendipia`), keeping URLs (`/projects/serendipia`) and the hardcoded
-  `project.id === "..."` checks working. Glob pattern was already recursive.
-- `scripts/cms-server.js` (the local admin CMS) — made listing recursive;
-  save/create now write into the folder matching each project's `category` and
-  **relocate the file automatically if the category changes**. New projects
-  default to `interactive/`.
+### Stock footage replaced with real stills
 
-### 3. Frontend / UI pass
-
-Implemented everything from the UI review **except the About/Contact tonal
-retone** (see Open items #1):
-
-- **Homepage** (`index.astro`): surfaced the previously commented-out
-  "Design & Visual Systems" section (3 projects were invisible). Project briefs
-  now show inline on mobile (were hover-only). Replaced the reflow-y hover
-  (title shrank) with a color + slide.
-- **Contact** (`contact.astro`): form now does a **real `mailto:`** submission
-  (was faking success and sending nothing). Removed misleading "security
-  theater" — leaked dev port `4322`, fake `AES-256`, fake `PGP_FINGERPRINT`.
-- **Location unified to Cluj-Napoca** (footer + contact were showing Timișoara
-  coords while the bio says Cluj). ⚠️ Confirm this is correct.
-- **SEO** (`Layout.astro`, `astro.config.mjs`): set `site` URL, canonical,
-  Open Graph + Twitter Card tags, `apple-touch-icon`, human-readable `<title>`s
-  (e.g. "About — Cristian Dubineanschi"). Project pages use their own still for
-  the social card.
-- **Accessibility/motion** (`Layout.astro`): the canvas particle cursor now
-  disables (native cursor restored) under `prefers-reduced-motion`; the
-  oscilloscope renders a static waveform instead of looping.
-
-### 4. Terminal colour tokens fixed (`global.css`)
-
-- Light-theme `--color-terminal-accent` / `-glow` / `-error` were a leftover
-  **red** (`#df3b26`) — set to the brand violet (`#8b6fc4` / `#a98fdb`) so
-  terminals are on-brand in both themes (they stay dark in both).
-- Mapped the old brighter accent `rgb(168, 85, 247)` → new
-  `rgb(139, 111, 196)` in the terminal/shell glows (contact form, loader
-  terminal box, theme toggle).
-
-### 5. Media lightbox on project pages (`projects/[id].astro`)
-
-- "Visual Documentation" gallery items are now clickable buttons (▶ for video,
-  ⤢ for image). Clicking opens a fullscreen lightbox: **videos play with sound +
-  native controls**, images open full-size. Close via ✕ / backdrop / Escape.
-  Focus management + body scroll lock included. Escape handler is bound once and
-  survives view-transition swaps.
-
-### 6. Tooling
-
-- Added the **astro-docs** HTTP MCP server (`claude mcp add ... astro-docs`).
-  ⚠️ Requires a Claude Code restart to activate.
+The five non-Bio-Sonic projects used mixkit.co stock clips as hero/thumbnail. No
+real videos exist on disk, so each hero + thumbnail now points at the project's
+real still (`jasper-properties`, `serendipia`, `urban-1000`, `rooted-structures`,
+`oracolul2000` → their `_01.jpg`). Heroes render as images (like Bio-Sonic Dust).
+No stock references remain in source or `dist`.
 
 ---
 
 ## Verified
 
-- `npm run build` — clean, all 10 pages incl. 6 project routes.
-- `npx prettier --check .` — passes.
-- CMS recursive listing tested against disk (finds all 6 across both folders).
-- SEO tags, design section, gallery buttons, and absence of the leaked
-  port/PGP confirmed in the built `dist/` HTML.
+- `npm run build` — clean, 10 pages + `sitemap-index.xml`.
+- `npm run format:check` — passes.
+- No `mixkit` / `googleapis` references in `dist`; admin UI not shipped;
+  HUD + project JSON stripped from production; heroes render real stills.
 
 ---
 
-## Open items / decisions for next session
+## Open items
 
-1. **About/Contact tonal retone (deliberately skipped).** The homepage is
-   "Brutalist Editorial"; About/Contact are still in the older terminal/sci-fi
-   voice (`SYSTEM SPECIFICATION`, `COMMUNICATION NODES`, `TRANSMIT_SIGNAL`).
-   Page `<title>`s were modernised but on-page headings/body were not. Biggest
-   remaining coherence gap — needs a direction decision before doing.
-2. **Deploy config — please confirm.** `site` is set to
-   `https://cristian-dubineanschi.github.io` (inferred). If you use a custom
-   domain or deploy to a `/media-artist-portfolio` subpath, update `site` (and
-   possibly `base`) in `astro.config.mjs`, or canonical/OG URLs will be wrong.
-3. **Confirm the city** is Cluj-Napoca (I unified to it from conflicting data).
-4. **Remaining old-purple `rgb(168, 85, 247)`** still in `Layout.astro` (canvas
-   cursor + indicator glow) and `admin.astro` (~6 spots) — not swept. Same
-   mechanical map to `139, 111, 196` if you want full consistency.
-5. **Contact form** is a `mailto:` (works, no backend). Comment in
-   `contact.astro` shows where to swap in Formspree/Web3Forms for a hosted form.
-6. **Nice-to-haves not done:** a dedicated 1200×630 homepage OG image; making
-   the project **hero** video also open in the lightbox; a contrast audit on the
-   smallest grey (`--color-muted`) text; reconsider the global
-   `h1–h6 { text-transform: uppercase }`.
-7. **Nothing is committed.** Large untracked surface (`.claude/`, `.github/`,
-   `scripts/`, `src/content/`, new pages/layouts). Decide what to commit.
+1. **Push / deploy.** No remote is configured (`git remote -v` is empty). Add a
+   remote and push `main` to go live — pushing triggers
+   `.github/workflows/deploy.yml`. In the repo: Settings → Pages → Source: GitHub
+   Actions.
+2. **Confirm `site` in `astro.config.mjs` before deploying.** It's the inferred
+   user-page URL `https://cristian-dubineanschi.github.io`. If this is a project
+   page, set `base: '/<repo>'` and update the `Sitemap:` line in
+   `public/robots.txt`, or canonical / OG / sitemap URLs will be wrong.
+3. **Real project video** is still welcome — the five projects are still-only.
+   Drop a video in and point `videoUrl`/`thumbnailUrl` at it (compress + add a
+   `_poster.jpg` like Bio-Sonic Dust).
+4. Nice-to-haves: dedicated 1200×630 homepage OG image; contrast pass on the
+   smallest grey labels (light theme `--color-muted`).
 
 ## Run notes
 
-- `npm run dev` starts both the CMS server (port 4322) and Astro (4321).
-- Admin panel: `http://localhost:4321/admin` (link only shows on localhost; needs
-  the 4322 CMS server up). If `EADDRINUSE: 4322`, `lsof -ti:4322 | xargs kill`.
+- `npm run dev` → CMS daemon (port 4322) + Astro (4321). Admin is localhost-only
+  at `/admin`. If `EADDRINUSE: 4322`, run `lsof -ti:4322 | xargs kill`.

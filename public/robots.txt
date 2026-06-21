@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+
+# Update this host if the `site` value in astro.config.mjs changes.
+Sitemap: https://cristian-dubineanschi.github.io/sitemap-index.xml
