@@ -325,6 +325,18 @@ const ogImage = [d.thumbnailUrl, ...(d.mediaGallery ?? [])].find((u) =>
               );
             })}
           </div>
+          {d.mediaGallery.length > 1 && (
+            <div class="gallery-dots">
+              {d.mediaGallery.map((_, i) => (
+                <button
+                  type="button"
+                  class={`gallery-dot${i === 0 ? " is-active" : ""}`}
+                  data-dot-index={i}
+                  aria-label={`Go to image ${i + 1}`}
+                />
+              ))}
+            </div>
+          )}
         </section>
       )
     }
@@ -430,8 +442,48 @@ const ogImage = [d.thumbnailUrl, ...(d.mediaGallery ?? [])].find((u) =>
     });
   }
 
+  // Mobile carousel: keep the dot indicators in sync with the swipe position,
+  // and let a dot tap jump to its slide.
+  function initGalleryCarousel() {
+    document.querySelectorAll<HTMLElement>(".gallery-grid").forEach((grid) => {
+      const dotsWrap = grid.parentElement?.querySelector(".gallery-dots");
+      const itemCount = grid.querySelectorAll(".gallery-item").length;
+      if (!dotsWrap || itemCount < 2) return;
+      const dots = Array.from(dotsWrap.querySelectorAll<HTMLButtonElement>(".gallery-dot"));
+
+      const setActive = (idx: number) => {
+        dots.forEach((d, di) => d.classList.toggle("is-active", di === idx));
+      };
+
+      // Tap a dot to slide to it.
+      dots.forEach((dot, i) => {
+        dot.addEventListener("click", () => {
+          grid.scrollTo({ left: i * grid.clientWidth, behavior: "smooth" });
+        });
+      });
+
+      // Derive the active slide from scroll position (deterministic, no observer race).
+      let ticking = false;
+      grid.addEventListener(
+        "scroll",
+        () => {
+          if (ticking) return;
+          ticking = true;
+          requestAnimationFrame(() => {
+            setActive(Math.round(grid.scrollLeft / grid.clientWidth));
+            ticking = false;
+          });
+        },
+        { passive: true },
+      );
+
+      setActive(0);
+    });
+  }
+
   function init() {
     initGallery();
+    initGalleryCarousel();
     respectReducedMotion();
   }
 
@@ -887,6 +939,72 @@ const ogImage = [d.thumbnailUrl, ...(d.mediaGallery ?? [])].find((u) =>
   .gallery-item:focus-visible .gallery-zoom {
     opacity: 1;
     transform: none;
+  }
+
+  /* Swipe-dot indicators (mobile only) */
+  .gallery-dots {
+    display: none;
+  }
+
+  /* ---- Mobile: full-bleed, swipeable carousel ---- */
+  @media (max-width: 768px) {
+    .gallery-grid {
+      /* Break out of the container padding to span the full viewport width */
+      width: 100vw;
+      margin-left: 50%;
+      transform: translateX(-50%);
+      /* Horizontal swipe with snap + native momentum on touch */
+      display: flex;
+      gap: 0;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+    }
+    .gallery-grid::-webkit-scrollbar {
+      display: none;
+    }
+    .gallery-item {
+      flex: 0 0 100vw;
+      scroll-snap-align: center;
+      scroll-snap-stop: always;
+      border: none;
+    }
+    .gallery-img {
+      width: 100vw;
+      height: 72vh;
+      object-fit: contain;
+      background: var(--color-bg-soft);
+      /* No hover on touch — show full colour, not the desktop grayscale */
+      filter: none;
+    }
+    /* Tap-to-zoom can't rely on hover, so keep the affordance visible */
+    .gallery-zoom {
+      opacity: 1;
+      transform: none;
+    }
+    .gallery-dots {
+      display: flex;
+      justify-content: center;
+      gap: 0.55rem;
+      margin-top: 1.1rem;
+    }
+    .gallery-dot {
+      width: 7px;
+      height: 7px;
+      padding: 0;
+      border: none;
+      border-radius: 50%;
+      background: var(--color-border);
+      cursor: pointer;
+      transition:
+        background 0.3s ease,
+        transform 0.3s ease;
+    }
+    .gallery-dot.is-active {
+      background: var(--color-accent);
+      transform: scale(1.35);
+    }
   }
 
   /* ============ MEDIA LIGHTBOX ============ */

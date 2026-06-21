@@ -454,29 +454,6 @@ a {
   display: none !important;
 }
 
-/* Global Custom Cursor overrides (circumvents Astro style scoping) */
-@media (pointer: fine) {
-  body.custom-cursor-active,
-  body.custom-cursor-active *,
-  body.custom-cursor-active a,
-  body.custom-cursor-active button,
-  body.custom-cursor-active select,
-  body.custom-cursor-active [role="button"],
-  body.custom-cursor-active [role="link"],
-  body.custom-cursor-active .project-card,
-  body.custom-cursor-active .media-container,
-  body.custom-cursor-active .media-container * {
-    cursor: none !important;
-  }
-
-  body.custom-cursor-active input,
-  body.custom-cursor-active textarea,
-  body.custom-cursor-active [contenteditable],
-  body.custom-cursor-active [contenteditable] * {
-    cursor: text !important;
-  }
-}
-
 /* Prevent background loop videos from intercepting cursor events and overriding pointer styling */
 .media-container video,
 .hero-video-wrapper video {
