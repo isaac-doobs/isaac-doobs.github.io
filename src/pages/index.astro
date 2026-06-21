@@ -51,7 +51,7 @@ function brief(text: string, max = 110) {
     <section class="windex">
       <div class="windex-head reveal">
         <h2 class="windex-label">Interactive Installations</h2>
-        <span class="windex-count">[{String(interactiveProjects.length).padStart(2, "0")}]</span>
+        <span class="windex-count">[{String(interactiveProjects.length + 1).padStart(2, "0")}]</span>
       </div>
       <div class="windex-list">
         {
@@ -76,6 +76,16 @@ function brief(text: string, max = 110) {
             </a>
           ))
         }
+        <div class="windex-row windex-row--soon reveal">
+          <span class="wr-num">{String(interactiveProjects.length + 1).padStart(2, "0")}</span>
+          <span class="wr-main">
+            <span class="wr-title">IcarusSyn 0.1</span>
+            <span class="wr-brief">Coming soon</span>
+          </span>
+          <span class="wr-cat">Interactive Installation</span>
+          <span class="wr-year">2026</span>
+          <span class="wr-arrow">—</span>
+        </div>
       </div>
     </section>
 
@@ -334,6 +344,33 @@ function brief(text: string, max = 110) {
   .windex-row:hover .wr-arrow {
     color: var(--color-accent);
     transform: translate(4px, -4px);
+  }
+
+  /* Coming-soon row — not a link, dimmed, no navigation */
+  .windex-row--soon {
+    cursor: default;
+    opacity: 0.45;
+  }
+  .windex-row--soon:hover {
+    opacity: 1;
+  }
+  .windex-row--soon:hover .wr-title {
+    color: var(--color-muted);
+    transform: translateX(8px);
+  }
+  .windex-row--soon:hover .wr-num {
+    color: var(--color-muted);
+  }
+  .windex-row--soon:hover .wr-arrow {
+    color: var(--color-muted);
+    transform: none;
+  }
+  .windex-row--soon .wr-brief {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--color-muted);
   }
 
   /* ============ RESPONSIVE ============ */
