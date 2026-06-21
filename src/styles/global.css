@@ -454,6 +454,13 @@ a {
   display: none !important;
 }
 
+/* While the fullscreen media viewer is open, hide the page chrome so it can't
+   paint over the viewer (the lightbox lives inside a stacking context). */
+body.lightbox-open .system-header,
+body.lightbox-open .system-status-bar {
+  display: none;
+}
+
 /* Prevent background loop videos from intercepting cursor events and overriding pointer styling */
 .media-container video,
 .hero-video-wrapper video {

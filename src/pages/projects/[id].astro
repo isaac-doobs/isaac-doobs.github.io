@@ -345,7 +345,7 @@ const ogImage = [d.thumbnailUrl, ...(d.mediaGallery ?? [])].find((u) =>
     <a href="/" class="back-link" data-magnetic data-magnetic-strength="0.3">← All works</a>
   </div>
 
-  <!-- ============ MEDIA LIGHTBOX ============ -->
+  <!-- ============ MEDIA LIGHTBOX (swipeable photo/video viewer) ============ -->
   <div
     class="media-lightbox"
     id="media-lightbox"
@@ -357,79 +357,157 @@ const ogImage = [d.thumbnailUrl, ...(d.mediaGallery ?? [])].find((u) =>
     <button class="lightbox-close" id="lightbox-close" type="button" aria-label="Close viewer">
       ✕
     </button>
-    <div class="lightbox-stage" id="lightbox-stage"></div>
+    <button class="lightbox-nav lightbox-prev" id="lightbox-prev" type="button" aria-label="Previous">
+      ‹
+    </button>
+    <div class="lightbox-track" id="lightbox-track"></div>
+    <button class="lightbox-nav lightbox-next" id="lightbox-next" type="button" aria-label="Next">
+      ›
+    </button>
+    <span class="lightbox-counter font-mono" id="lightbox-counter"></span>
   </div>
 </Layout>
 
 <script>
-  // Click a gallery thumbnail to open the media in a fullscreen lightbox.
-  // Videos open with sound + native controls; images open at full size.
+  // Tap any gallery item to open a fullscreen, swipeable viewer of all of the
+  // project's media. Photos and videos share one track — swipe (touch), the
+  // arrows, or the ← / → keys move between them. Videos carry sound + native
+  // controls and don't download until shown; only the visible one plays.
   function initGallery() {
     const lightbox = document.getElementById("media-lightbox") as HTMLElement | null;
-    const stage = document.getElementById("lightbox-stage");
+    const track = document.getElementById("lightbox-track");
     const closeBtn = document.getElementById("lightbox-close");
-    const items = document.querySelectorAll<HTMLElement>(".gallery-item");
-    if (!lightbox || !stage || !closeBtn || items.length === 0) return;
+    const prevBtn = document.getElementById("lightbox-prev") as HTMLButtonElement | null;
+    const nextBtn = document.getElementById("lightbox-next") as HTMLButtonElement | null;
+    const counter = document.getElementById("lightbox-counter");
+    const items = Array.from(document.querySelectorAll<HTMLElement>(".gallery-item"));
+    if (!lightbox || !track || !closeBtn || !prevBtn || !nextBtn || !counter || items.length === 0)
+      return;
 
+    const media = items.map((it) => ({
+      src: it.dataset.mediaSrc || "",
+      type: it.dataset.mediaType || "image",
+      poster: it.querySelector("img")?.getAttribute("src") || "",
+    }));
+    const multiple = media.length > 1;
     let lastFocused: HTMLElement | null = null;
+    let current = 0;
+    let built = false;
 
-    function openMedia(src: string, type: string) {
-      if (!lightbox || !stage || !closeBtn) return;
-      stage.innerHTML = "";
-
-      if (type === "video") {
-        const video = document.createElement("video");
-        video.src = src;
-        video.controls = true;
-        video.autoplay = true;
-        video.loop = true;
-        video.playsInline = true;
-        stage.appendChild(video);
-      } else {
-        const img = document.createElement("img");
-        img.src = src;
-        img.alt = "Visual documentation";
-        stage.appendChild(img);
-      }
-
-      lastFocused = document.activeElement as HTMLElement;
-      lightbox.hidden = false;
-      requestAnimationFrame(() => lightbox.classList.add("is-open"));
-      document.body.style.overflow = "hidden";
-      (closeBtn as HTMLElement).focus();
+    function buildSlides() {
+      if (!track) return;
+      track.innerHTML = "";
+      media.forEach((m) => {
+        const slide = document.createElement("div");
+        slide.className = "lightbox-slide";
+        if (m.type === "video") {
+          const video = document.createElement("video");
+          video.src = m.src;
+          if (m.poster) video.poster = m.poster;
+          video.controls = true;
+          video.loop = true;
+          video.playsInline = true;
+          video.preload = "none";
+          slide.appendChild(video);
+        } else {
+          const img = document.createElement("img");
+          img.src = m.src;
+          img.alt = "Visual documentation";
+          slide.appendChild(img);
+        }
+        track.appendChild(slide);
+      });
+      built = true;
     }
 
-    function closeMedia() {
-      if (!lightbox || !stage) return;
+    function setActive(i: number) {
+      if (!track) return;
+      current = Math.max(0, Math.min(media.length - 1, i));
+      Array.from(track.children).forEach((slide, si) => {
+        const v = slide.querySelector("video");
+        if (!v) return;
+        if (si === current) v.play().catch(() => {});
+        else v.pause();
+      });
+      if (counter) counter.textContent = `${current + 1} / ${media.length}`;
+      if (prevBtn) prevBtn.disabled = current === 0;
+      if (nextBtn) nextBtn.disabled = current === media.length - 1;
+    }
+
+    function goTo(i: number, smooth: boolean) {
+      if (!track) return;
+      track.scrollTo({ left: i * track.clientWidth, behavior: smooth ? "smooth" : "auto" });
+    }
+
+    function open(index: number) {
+      if (!lightbox || !track || !closeBtn) return;
+      if (!built) buildSlides();
+      lastFocused = document.activeElement as HTMLElement;
+      lightbox.hidden = false;
+      const navDisplay = multiple ? "" : "none";
+      if (prevBtn) prevBtn.style.display = navDisplay;
+      if (nextBtn) nextBtn.style.display = navDisplay;
+      if (counter) counter.style.display = navDisplay;
+      requestAnimationFrame(() => {
+        lightbox.classList.add("is-open");
+        goTo(index, false);
+        setActive(index);
+      });
+      document.body.style.overflow = "hidden";
+      document.body.classList.add("lightbox-open");
+      closeBtn.focus();
+    }
+
+    function close() {
+      if (!lightbox || !track) return;
       lightbox.classList.remove("is-open");
       document.body.style.overflow = "";
+      document.body.classList.remove("lightbox-open");
+      track.querySelectorAll("video").forEach((v) => v.pause());
       window.setTimeout(() => {
         lightbox.hidden = true;
-        stage.innerHTML = ""; // stops/unloads the playing video
       }, 300);
       if (lastFocused && typeof lastFocused.focus === "function") lastFocused.focus();
     }
 
-    items.forEach((item) => {
-      item.addEventListener("click", () => {
-        openMedia(item.dataset.mediaSrc || "", item.dataset.mediaType || "image");
-      });
-    });
+    // Track the active slide as the viewer is swiped/scrolled.
+    let ticking = false;
+    track.addEventListener(
+      "scroll",
+      () => {
+        if (ticking || !track) return;
+        ticking = true;
+        requestAnimationFrame(() => {
+          if (track) setActive(Math.round(track.scrollLeft / track.clientWidth));
+          ticking = false;
+        });
+      },
+      { passive: true },
+    );
 
-    closeBtn.addEventListener("click", closeMedia);
+    items.forEach((item, i) => item.addEventListener("click", () => open(i)));
+    prevBtn.addEventListener("click", () => goTo(current - 1, true));
+    nextBtn.addEventListener("click", () => goTo(current + 1, true));
+    closeBtn.addEventListener("click", close);
+    // Tap the dim backdrop around a slide to close.
+    track.addEventListener("click", (e) => {
+      if ((e.target as HTMLElement).classList.contains("lightbox-slide")) close();
+    });
     lightbox.addEventListener("click", (e) => {
-      if (e.target === lightbox) closeMedia();
+      if (e.target === lightbox) close();
     });
   }
 
-  // Global Escape-to-close, bound once. Looks up the current lightbox live so it
-  // keeps working across view-transition page swaps.
-  if (!(window as any).__galleryEscBound) {
-    (window as any).__galleryEscBound = true;
+  // Global keyboard control, bound once. Resolves the live lightbox each time so
+  // it keeps working across view-transition page swaps.
+  if (!(window as any).__galleryKeysBound) {
+    (window as any).__galleryKeysBound = true;
     document.addEventListener("keydown", (e) => {
-      if (e.key !== "Escape") return;
       const lb = document.getElementById("media-lightbox");
-      if (lb && !lb.hidden) document.getElementById("lightbox-close")?.click();
+      if (!lb || lb.hidden) return;
+      if (e.key === "Escape") document.getElementById("lightbox-close")?.click();
+      else if (e.key === "ArrowLeft") document.getElementById("lightbox-prev")?.click();
+      else if (e.key === "ArrowRight") document.getElementById("lightbox-next")?.click();
     });
   }
 
@@ -1012,10 +1090,6 @@ const ogImage = [d.thumbnailUrl, ...(d.mediaGallery ?? [])].find((u) =>
     position: fixed;
     inset: 0;
     z-index: 10000;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 5vmin;
     background-color: var(--color-video-overlay);
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
@@ -1028,28 +1102,107 @@ const ogImage = [d.thumbnailUrl, ...(d.mediaGallery ?? [])].find((u) =>
   .media-lightbox.is-open {
     opacity: 1;
   }
-  .lightbox-stage {
+  /* Swipeable track: one slide per media item, snap on swipe/scroll */
+  .lightbox-track {
+    position: absolute;
+    inset: 0;
     display: flex;
-    max-width: min(1100px, 92vw);
-    max-height: 86vh;
-    transform: scale(0.96);
-    transition: transform 0.35s var(--ease-out-expo);
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
   }
-  .media-lightbox.is-open .lightbox-stage {
-    transform: scale(1);
+  .lightbox-track::-webkit-scrollbar {
+    display: none;
   }
-  .lightbox-stage video,
-  .lightbox-stage img {
+  .lightbox-slide {
+    flex: 0 0 100%;
+    scroll-snap-align: center;
+    scroll-snap-stop: always;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4.5vmin;
+  }
+  .lightbox-slide img,
+  .lightbox-slide video {
     display: block;
-    width: auto;
-    height: auto;
     max-width: 100%;
-    max-height: 86vh;
+    max-height: 90vh;
+    object-fit: contain;
     border: 1px solid var(--color-border);
     background: #000;
   }
+  /* Prev / next arrows (desktop) */
+  .lightbox-nav {
+    position: fixed;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 3rem;
+    height: 3rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--color-border);
+    border-radius: 50%;
+    background: var(--color-video-overlay);
+    color: var(--color-text);
+    font-family: var(--font-mono);
+    font-size: 1.6rem;
+    line-height: 1;
+    cursor: pointer;
+    z-index: 10001;
+    transition:
+      border-color 0.2s ease,
+      color 0.2s ease,
+      opacity 0.2s ease;
+  }
+  .lightbox-prev {
+    left: 1.25rem;
+  }
+  .lightbox-next {
+    right: 1.25rem;
+  }
+  .lightbox-nav:hover:not(:disabled) {
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+  }
+  .lightbox-nav:disabled {
+    opacity: 0.25;
+    cursor: default;
+  }
+  .lightbox-counter {
+    position: fixed;
+    bottom: 1.25rem;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10001;
+    font-size: 0.78rem;
+    letter-spacing: 0.08em;
+    color: var(--color-text);
+    background: var(--color-video-overlay);
+    border: 1px solid var(--color-border);
+    border-radius: 4px;
+    padding: 0.3rem 0.8rem;
+  }
+  /* Mobile: swipe is the control, so drop the arrows and go edge-to-edge */
+  @media (max-width: 768px) {
+    .lightbox-nav {
+      display: none !important;
+    }
+    .lightbox-slide {
+      padding: 0;
+    }
+    .lightbox-slide img,
+    .lightbox-slide video {
+      max-height: 100vh;
+      border: none;
+    }
+  }
   .lightbox-close {
     position: fixed;
+    z-index: 10001;
     top: 1.25rem;
     right: 1.5rem;
     width: 2.5rem;
