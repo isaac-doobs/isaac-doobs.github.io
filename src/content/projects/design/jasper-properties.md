@@ -27,8 +27,6 @@ videoUrl: "/assets/projects/jasper-properties_01.jpg"
 thumbnailUrl: "/assets/projects/jasper-properties_01.jpg"
 mediaGallery:
   - "/assets/projects/jasper-properties_01.jpg"
-blueprintUrl: "/assets/helios_blueprint.png"
-blueprintCaption: "User Flow Diagram & Information Architecture Schematic (v1.1)"
 codeLanguage: "javascript"
 codeSnippet: |
   // Jasper Properties: Interface scroll transition controller

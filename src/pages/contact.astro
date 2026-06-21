@@ -91,17 +91,6 @@ import Layout from "../layouts/Layout.astro";
             </span>
           </div>
           <div class="param-row">
-            <span class="param-name">GitHub</span>
-            <span class="param-val">
-              <a
-                href="https://github.com/cristian-dubineanschi"
-                target="_blank"
-                rel="noopener noreferrer"
-                class="tech-link">github.com/cristian-dubineanschi</a
-              >
-            </span>
-          </div>
-          <div class="param-row">
             <span class="param-name">Location</span>
             <span class="param-val">Cluj-Napoca, RO</span>
           </div>
@@ -122,9 +111,9 @@ import Layout from "../layouts/Layout.astro";
           </div>
           <div class="terminal-body font-mono text-glow">
             <div class="diag-line">Available for selected work</div>
-            <div class="diag-line">Typically replies within 48 hours</div>
+            <div class="diag-line">Replies within ~48 hours</div>
             <div class="diag-line">Based in Cluj-Napoca, RO (UTC+2)</div>
-            <div class="diag-line">Email & GitHub open</div>
+            <div class="diag-line">Email open</div>
             <div class="diag-line blink-cursor">▋</div>
           </div>
         </div>
@@ -424,5 +413,65 @@ import Layout from "../layouts/Layout.astro";
     .contact-container {
       padding-top: 1.5rem;
     }
+  }
+
+  /* Light theme — the message form and status box are decorative "terminals",
+     not code, so adapt them to the light palette instead of staying dark.
+     (Dark theme keeps the original terminal look untouched.) */
+  :root[data-theme="light"] .terminal-form-box,
+  :root[data-theme="light"] #contact-diag-term {
+    background-color: var(--color-card-bg);
+    border-color: var(--color-border);
+  }
+  :root[data-theme="light"] .terminal-form-box:hover {
+    border-color: rgba(95, 74, 147, 0.35);
+  }
+  :root[data-theme="light"] .terminal-form-header,
+  :root[data-theme="light"] #contact-diag-term .terminal-header {
+    background-color: var(--color-bg-soft);
+    border-bottom-color: var(--color-border);
+  }
+  :root[data-theme="light"] .form-title,
+  :root[data-theme="light"] #contact-diag-term .terminal-title {
+    color: var(--color-muted);
+  }
+  :root[data-theme="light"] .form-field label {
+    color: var(--color-accent);
+  }
+  :root[data-theme="light"] .form-input,
+  :root[data-theme="light"] .form-textarea {
+    background-color: rgba(20, 19, 15, 0.03);
+    border-color: var(--color-border);
+    color: var(--color-text);
+  }
+  :root[data-theme="light"] .form-input::placeholder,
+  :root[data-theme="light"] .form-textarea::placeholder {
+    color: var(--color-muted);
+  }
+  :root[data-theme="light"] .form-input:focus,
+  :root[data-theme="light"] .form-textarea:focus {
+    border-color: var(--color-accent);
+    box-shadow: 0 0 10px rgba(95, 74, 147, 0.15);
+  }
+  :root[data-theme="light"] .submit-btn {
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+  }
+  :root[data-theme="light"] .submit-btn:hover {
+    background-color: var(--color-accent);
+    color: var(--color-bg);
+  }
+  :root[data-theme="light"] .status-line.info {
+    color: var(--color-muted);
+  }
+  :root[data-theme="light"] .status-line.success {
+    color: var(--color-accent);
+  }
+  :root[data-theme="light"] #contact-diag-term .terminal-body {
+    background-color: var(--color-card-bg);
+  }
+  :root[data-theme="light"] #contact-diag-term .diag-line,
+  :root[data-theme="light"] #contact-diag-term .blink-cursor {
+    color: var(--color-text);
   }
 </style>
