@@ -159,6 +159,13 @@ body::before {
   }
 }
 
+/* Keep the fixed background grid + dots (z-index:1) behind the page content
+   by lifting the content wrapper above them. */
+#main-content {
+  position: relative;
+  z-index: 2;
+}
+
 /* Scanline disabled in brutalist editorial direction */
 body::after {
   display: none;
