@@ -126,11 +126,6 @@ const personLd = {
           <a href="/" class="nav-link active" id="nav-link-terminal">Works</a>
           <a href="/about" class="nav-link" id="nav-link-about">About</a>
           <a href="/contact" class="nav-link" id="nav-link-contact">Contact</a>
-
-          <button id="theme-toggle" class="theme-toggle-btn" aria-label="Toggle theme">
-            <span class="toggle-indicator-light"></span>
-            <span id="theme-btn-text">DARK</span>
-          </button>
         </nav>
       </div>
     </header>
@@ -157,6 +152,11 @@ const personLd = {
           <span class="divider">|</span>
           <span class="meta-label">LOC:</span>
           <span class="meta-val">46.77° N, 23.59° E</span>
+          <span class="divider">|</span>
+          <button id="theme-toggle" class="theme-toggle-btn" aria-label="Toggle theme">
+            <span class="toggle-indicator-light"></span>
+            <span id="theme-btn-text">DARK</span>
+          </button>
         </div>
       </div>
     </div>
@@ -1005,6 +1005,11 @@ const personLd = {
       .divider {
         color: var(--color-border);
       }
+      /* Compact the theme toggle so it sits flush in the status bar height */
+      .system-status-bar .theme-toggle-btn {
+        padding: 0.2rem 0.55rem;
+        font-size: 0.65rem;
+      }
 
       body {
         padding-bottom: 3.5rem; /* Space so content is not hidden by the status bar */
@@ -1020,7 +1025,11 @@ const personLd = {
         .status-bar-container {
           padding: 0 1rem;
         }
-        .status-right {
+        /* Keep the theme toggle reachable on mobile; hide only the HUD readouts. */
+        .status-right .osc-container-new,
+        .status-right .divider,
+        .status-right .meta-label,
+        .status-right .meta-val {
           display: none;
         }
       }
