@@ -38,6 +38,9 @@ mediaGallery:
   - "/assets/projects/inbetween-wav_03.jpg"
   - "/assets/projects/inbetween-wav_04.jpg"
   - "/assets/projects/inbetween-wav_05.jpg"
+  - "/assets/projects/inbetween-wav_06.mp4"
+  - "/assets/projects/inbetween-wav_07.mp4"
+  - "/assets/projects/inbetween-wav_08.mp4"
 codeLanguage: "python"
 codeSnippet: |
   # (in)between.wav — representative sync mapping (TouchDesigner / Python)
