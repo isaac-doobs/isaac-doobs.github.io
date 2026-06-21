@@ -1,4 +1,9 @@
 ---
+// Self-hosted fonts (no Google CDN — faster first paint, no third-party request).
+import "@fontsource-variable/inter";
+import "@fontsource-variable/space-grotesk";
+import "@fontsource/space-mono/400.css";
+import "@fontsource/space-mono/700.css";
 import "../styles/global.css";
 import { ClientRouter } from "astro:transitions";
 
@@ -19,6 +24,21 @@ const {
 const siteOrigin = Astro.site ?? new URL(Astro.url.origin);
 const canonicalURL = new URL(Astro.url.pathname, siteOrigin);
 const socialImage = new URL(image, siteOrigin);
+
+// Structured data so search engines understand who the site is about.
+const personLd = {
+  "@context": "https://schema.org",
+  "@type": "Person",
+  name: "Cristian Dubineanschi",
+  jobTitle: "New Media Artist",
+  url: siteOrigin.href,
+  address: {
+    "@type": "PostalAddress",
+    addressLocality: "Cluj-Napoca",
+    addressCountry: "RO",
+  },
+  sameAs: ["https://github.com/cristian-dubineanschi"],
+};
 ---
 
 <!doctype html>
@@ -48,6 +68,9 @@ const socialImage = new URL(image, siteOrigin);
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content={socialImage} />
+
+    <!-- Structured data (schema.org Person) -->
+    <script type="application/ld+json" set:html={JSON.stringify(personLd)} />
 
     <!-- Inline script to set theme before paint to prevent FOUT -->
     <script is:inline>
@@ -636,7 +659,7 @@ const socialImage = new URL(image, siteOrigin);
         els.forEach((el) => {
           if (el.dataset.magBound) return;
           el.dataset.magBound = "true";
-          const strength = parseFloat(el.dataset.magnetic || "0.3");
+          const strength = parseFloat(el.dataset.magneticStrength || "0.3");
           el.addEventListener("mousemove", (e) => {
             const r = el.getBoundingClientRect();
             const mx = e.clientX - (r.left + r.width / 2);

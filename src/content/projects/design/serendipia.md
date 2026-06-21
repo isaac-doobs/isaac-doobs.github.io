@@ -23,8 +23,8 @@ hardware:
 inputs:
   - "Curator Statement"
   - "Fluid Gradient Maps"
-videoUrl: "https://assets.mixkit.co/videos/preview/mixkit-paint-splashes-blending-in-water-41584-large.mp4"
-thumbnailUrl: "https://assets.mixkit.co/videos/preview/mixkit-paint-splashes-blending-in-water-41584-large.mp4"
+videoUrl: "/assets/projects/serendipia_01.jpg"
+thumbnailUrl: "/assets/projects/serendipia_01.jpg"
 mediaGallery:
   - "/assets/projects/serendipia_01.jpg"
 blueprintUrl: "/assets/chronos_blueprint.png"

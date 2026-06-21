@@ -18,8 +18,8 @@ hardware:
 inputs:
   - "Ambient Audio Signals"
   - "User Proximity Map"
-videoUrl: "https://assets.mixkit.co/videos/preview/mixkit-bright-led-lights-flashing-in-a-dark-hallway-40989-large.mp4"
-thumbnailUrl: "https://assets.mixkit.co/videos/preview/mixkit-bright-led-lights-flashing-in-a-dark-hallway-40989-large.mp4"
+videoUrl: "/assets/projects/oracolul2000_01.jpg"
+thumbnailUrl: "/assets/projects/oracolul2000_01.jpg"
 academicContext: "Created in collaboration for a project signed by the artist Călin Nahaiciuc, exhibited in a gallery space in Cluj-Napoca, 2025."
 process:
   - "Established the concept and the spatial scenography."

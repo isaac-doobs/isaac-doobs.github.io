@@ -17,6 +17,10 @@
     "astro": "^6.4.6"
   },
   "devDependencies": {
+    "@astrojs/sitemap": "^3.7.3",
+    "@fontsource-variable/inter": "^5.2.8",
+    "@fontsource-variable/space-grotesk": "^5.2.10",
+    "@fontsource/space-mono": "^5.2.9",
     "prettier": "^3.8.4",
     "prettier-plugin-astro": "^0.14.1"
   }

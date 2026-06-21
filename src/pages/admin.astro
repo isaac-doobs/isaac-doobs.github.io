@@ -2,6 +2,10 @@
 import { getCollection } from "astro:content";
 import Layout from "../layouts/Layout.astro";
 
+// Authoring console — localhost-only. It talks to the local CMS daemon and must
+// never ship on the deployed site, so redirect to home in production builds.
+if (import.meta.env.PROD) return Astro.redirect("/");
+
 // Load projects at build time to serve as fallback/static data
 const initialProjects = await getCollection("projects");
 initialProjects.sort((a, b) => b.data.year - a.data.year);

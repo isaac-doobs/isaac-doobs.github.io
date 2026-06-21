@@ -1,125 +1,129 @@
-# SYS // MEDIA_ARTIST_PORTFOLIO
+# Cristian Dubineanschi — Portfolio
 
-An immersive, high-performance, minimalist system repository for interactive media artists, designed to present large-scale video documentation, technical data grids, hardware schematics, and code archives.
-
-Hosted at: `https://<your-username>.github.io/`
-
----
-
-## 1. Visual Direction & Aesthetic
-
-- **Palette:** Strict dark-mode native.
-  - **Background:** Absolute Deep Black (`#000000`) to maximize the contrast of installation video glows.
-  - **Primary Accent:** Electric Purple (`#a855f7` / `#8b5cf6`), used selectively for interface borders, hover signals, glowing text, and terminal cursors.
-  - **Muted UI:** Cool Gray (`#9ca3af`) and desaturated lavender (`#cbd5e1`) for secondary data tags and technical labels.
-- **Typography:** Strict grid-aligned headers (Inter / SF Pro) paired with monospace body fonts (Fira Code / Roboto Mono) for hardware logs and code readouts.
-- **Aesthetic Details:** CRT scanline animations and digital mesh grid overlays to reinforce the raw technology signal pipeline.
+Portfolio for an interactive media artist: installations, light systems, and
+visual design. Built with **Astro 6** (static, zero-JS by default) and deployed
+to GitHub Pages.
 
 ---
 
-## 2. Technical Stack
+## 1. Visual direction
 
-- **Framework:** [Astro v6](https://astro.build/) (lightning fast, zero-JS by default, static HTML generation).
-- **Content Model:** Astro Content Collections using local Markdown files for modular project pages.
-- **Transitions:** Built-in Astro `<ClientRouter />` utilizing the native browser View Transitions API for glitch-free page switches.
-- **Syntax Highlighting:** Integrated Shiki highlighting engine inside the code terminals.
+Brutalist-editorial: monochrome base with a single muted-violet accent.
 
----
+- **Palette:** near-black ink on off-white paper (dark theme) / warm bone paper
+  (light theme). Accent `#8b6fc4` (dark) / `#5f4a93` (light), used sparingly.
+- **Typography:** Space Grotesk (display/sans) + Inter (body) + Space Mono
+  (labels/code). **Self-hosted via `@fontsource`** — no external font CDN.
+- **Motion:** a Swiss column grid, cursor-reactive grid dots, a particle cursor,
+  scroll reveals, and a film-grain overlay — all gated behind
+  `prefers-reduced-motion` and disabled on touch / small screens.
 
-## 3. External Media Pipeline (Critical Optimization)
-
-To prevent hitting GitHub's **100GB/month bandwidth limit** and ensure near-instant page loads:
-
-1.  **Do NOT host production-grade high-res video loops in the Git repository.**
-2.  **Streaming Platform:** Host your primary project videos externally (e.g. Vimeo PRO direct MP4 link, Cloudinary, or AWS S3 bucket).
-3.  **Thumbnails:** Use highly compressed, silent WebM/MP4 loops for the homepage grid.
-4.  **Lazy Loading:** The homepage grid implements an `IntersectionObserver` that only loads and plays videos when they enter the viewport and pauses them when off-screen, saving client bandwidth and processing power.
+Theme is persisted to `localStorage` under `system-theme`; an inline script in
+`Layout.astro` sets it before paint to avoid a flash.
 
 ---
 
-## 4. How to Add a New Project Page
+## 2. Stack
 
-Adding a new project to the portfolio is as simple as creating a new Markdown file in the `src/content/projects/` directory.
+- **Framework:** [Astro v6](https://astro.build/) — static HTML generation.
+- **Content:** Astro Content Collections from local Markdown in
+  `src/content/projects/` (see `src/content.config.ts` for the schema).
+- **Transitions:** native View Transitions via `<ClientRouter />`.
+- **Code highlighting:** built-in Shiki (`<Code />`).
+- **SEO:** `@astrojs/sitemap`, `public/robots.txt`, canonical + Open Graph tags,
+  and schema.org `Person` JSON-LD in `Layout.astro`.
 
-### Step 1: Create the markdown file
+---
 
-Create a new file: `src/content/projects/your-project-slug.md`
+## 3. Media
 
-### Step 2: Fill in the Frontmatter Metadata
+Project hero/gallery media lives in frontmatter (`videoUrl`, `thumbnailUrl`,
+`mediaGallery`). Paths starting with `/assets/...` are served from `public/`;
+full URLs are loaded as-is.
 
-Copy the following structure into your new markdown file:
+- **Heavy video is not auto-loaded in the gallery grid.** A lightweight poster
+  still is shown (convention: same path with `_poster.jpg`, e.g.
+  `bio-sonic-dust.mp4` → `bio-sonic-dust_poster.jpg`) and the full clip — with
+  sound — is fetched only when the visitor opens the lightbox.
+- `public/assets/projects/bio-sonic-dust.mp4` is committed in-repo (H.264 +
+  AAC, 1280×720, ~21 MB). Keep large originals out of the repo where possible;
+  GitHub Pages has a monthly bandwidth limit.
+- ⚠️ Several projects currently point at **mixkit.co stock clips** as
+  placeholders — replace these with real documentation before sharing widely.
+
+---
+
+## 4. Add a new project
+
+Create `src/content/projects/<category>/<slug>.md` (the folder is `design` or
+`interactive`; the public URL is always the flat slug, `/projects/<slug>`).
+
+Required + optional frontmatter (must satisfy `src/content.config.ts`):
 
 ```markdown
 ---
 title: "PROJECT NAME"
-year: 2026
-status: "Operational" # [Operational, Active, Archived, In Development]
-medium:
-  - "Primary Medium Tag"
-  - "Secondary Medium Tag"
-concept: "Write a short paragraph summarizing the artistic concept, spatial installation layout, and thematic exploration of the piece."
-software:
-  - "Software A"
-  - "Software B"
-hardware:
-  - "Hardware A"
-  - "Hardware B"
-inputs:
-  - "Sensor Input A"
-  - "Sensor Input B"
-videoUrl: "https://your-external-host.com/high-res-hero-loop.mp4"
-thumbnailUrl: "https://your-external-host.com/compressed-grid-thumbnail.mp4"
-blueprintUrl: "/assets/your_custom_blueprint.png" # Place PNG in public/assets/
-blueprintCaption: "System Signal Flow & Wiring Schematic v1.0"
-codeLanguage: "glsl" # [glsl, python, cpp, javascript, c, rust, etc.]
+category: "Interactive" # required — "Interactive" | "Design"
+year: 2026 # required (number)
+status: "Operational" # required — Operational | Active | Archived | In Development
+medium: # required
+  - "Primary Medium"
+  - "Secondary Medium"
+concept: "One paragraph on the concept, installation, and themes." # required
+software: ["Software A", "Software B"] # required
+hardware: ["Hardware A"] # required
+inputs: ["Sensor Input A"] # required
+videoUrl: "/assets/projects/your-hero.jpg" # required (.mp4 → <video>, image → <img>)
+thumbnailUrl: "/assets/projects/your-hero.jpg" # required
+# --- optional ---
+academicContext: "Course / program context."
+process: ["Step one", "Step two"]
+challenges: "Problems and how they were solved."
+researchRelevance: "How it connects to the research theme."
+mediaGallery: ["/assets/projects/shot_01.jpg", "/assets/projects/clip.mp4"]
+blueprintUrl: "/assets/your_blueprint.png"
+blueprintCaption: "System signal flow v1.0"
+codeLanguage: "python" # default: "javascript"
 codeSnippet: |
-  // Paste your key code snippet here
-  void main() {
-      // code
-  }
+  def main():
+      pass
 ---
 
-### Markdown Content Below Frontmatter
-
-Any additional markdown headers, text, ascii diagrams, or logs placed here will automatically compile and render under the Artistic Concept block on the project details page.
+Any Markdown placed below the frontmatter renders under the Concept block.
 ```
+
+You can also use the local visual editor (see below).
 
 ---
 
-## 5. Development & Deployment
-
-### Local Development
-
-To run the server locally:
+## 5. Development
 
 ```bash
-npm run dev
+npm run dev   # CMS daemon (port 4322) + Astro dev server (port 4321)
+npm run build # static production build → dist/
+npm run preview
+npm run format        # Prettier write
+npm run format:check  # Prettier check
 ```
 
-Open `http://localhost:4321/` in your browser.
+Open `http://localhost:4321/`.
 
-### Static Production Build
+**Local authoring console** lives at `/admin` and a per-page "Edit live" HUD on
+project pages. Both are **localhost-only**: the admin route redirects to `/` in
+production builds, the HUD is stripped from the production bundle, and edits are
+written to disk by `scripts/cms-server.js` (port 4322). If you hit
+`EADDRINUSE: 4322`, run `lsof -ti:4322 | xargs kill`.
 
-To test the static build pipeline locally:
+---
 
-```bash
-npm run build
-```
+## 6. Deployment (GitHub Pages)
 
-The output files will be built into the `dist/` directory.
+Pushing to `main` triggers `.github/workflows/deploy.yml`, which builds the site
+and publishes `dist/` via GitHub Actions. In the repo: **Settings → Pages →
+Build and deployment → Source: GitHub Actions.**
 
-### GitHub Pages Configuration
-
-Deployment is automated via GitHub Actions on every commit pushed to the `main` branch.
-
-1.  If you are deploying to a **Project Page** (e.g., `username.github.io/my-repo-name`) rather than a **User Page** (e.g., `username.github.io`):
-    - Open `astro.config.mjs`.
-    - Uncomment and set `site` and `base`:
-      ```javascript
-      site: 'https://username.github.io',
-      base: '/my-repo-name',
-      ```
-2.  Enable GitHub Pages on your repository:
-    - Go to **Settings** -> **Pages**.
-    - Under **Build and deployment**, set **Source** to **GitHub Actions**.
-    - Once you push your code, the workflow in `.github/workflows/deploy.yml` will automatically build and publish the site.
+**Before deploying, confirm `site` in `astro.config.mjs`.** It's currently
+`https://cristian-dubineanschi.github.io` (a root user page). If you use a custom
+domain or a project page (`username.github.io/repo-name`), update `site` (and set
+`base`) or canonical / OG / sitemap URLs will be wrong. Also update the `Sitemap:`
+line in `public/robots.txt` to match.

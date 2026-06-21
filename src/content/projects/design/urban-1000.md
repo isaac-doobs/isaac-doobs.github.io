@@ -23,8 +23,8 @@ hardware:
 inputs:
   - "Product Identity Specs"
   - "High-Contrast Visual Assets"
-videoUrl: "https://assets.mixkit.co/videos/preview/mixkit-futuristic-hologram-of-a-smart-city-43285-large.mp4"
-thumbnailUrl: "https://assets.mixkit.co/videos/preview/mixkit-futuristic-hologram-of-a-smart-city-43285-large.mp4"
+videoUrl: "/assets/projects/urban-1000_01.jpg"
+thumbnailUrl: "/assets/projects/urban-1000_01.jpg"
 mediaGallery:
   - "/assets/projects/urban-1000_01.jpg"
 blueprintUrl: "/assets/aperture_blueprint.png"
