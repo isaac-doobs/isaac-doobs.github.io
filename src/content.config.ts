@@ -19,6 +19,7 @@ const projects = defineCollection({
     year: z.number(),
     status: z.string(),
     medium: z.array(z.string()),
+    dimensions: z.string().optional(),
     concept: z.string(),
     academicContext: z.string().optional(),
     process: z.array(z.string()).optional(),

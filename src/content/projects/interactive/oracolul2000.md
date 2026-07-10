@@ -6,6 +6,7 @@ status: "Operational"
 medium:
   - "Environmental LED Installation"
   - "Interactive Light Scenography"
+dimensions: "Site-specific · gallery installation (300+ addressable LEDs)"
 concept: "Oracolul2000 is a collaborative environmental LED installation developed for a project signed by Călin Nahaiciuc. The installation explores the construction of a reactive, ambient luminous presence within a gallery space, mapping digital signals to custom addressable LED strips. Through physical hardware integration and microcontroller programming, the installation bridges the gap between digital pulse and architectural scenography, evoking a ritualistic and contemplative atmosphere."
 software:
   - "TouchDesigner"

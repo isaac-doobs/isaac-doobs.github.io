@@ -7,6 +7,7 @@ medium:
   - "Interactive Light Installation"
   - "Voice / Sound Interaction"
   - "Addressable LED Lighting"
+dimensions: "3.5 m ground ring + ~5.5 m semicircular arch · ~15 m WS2811 LED"
 concept: "(in)between.wav is an interactive light installation about the invisible harmony between people. We rarely notice the silent ways we sync up, the way footsteps fall into step or breathing matches in a deep conversation. The piece listens to two voices and turns the unspoken energy between them into light. Two people step into a ring and use their voices; the lights begin as two separate, chaotic signals, and as the voices align an arch of light fills above them and the floor follows. It gives the voice a body you can see but not hold, and asks whether technology can help us feel the exact moment we truly connect."
 academicContext: "Developed within the Master of Digital Interactive Arts program, Faculty of Theatre and Film, Babeș-Bolyai University (UBB), 2026. Creative Visual Arts Project, coordinated by Prof. Cristina Pop-Tiron. Exhibited at the Ethnographical Museum of Transylvania."
 process:

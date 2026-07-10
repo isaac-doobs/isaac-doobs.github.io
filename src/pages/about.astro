@@ -10,7 +10,7 @@ import Layout from "../layouts/Layout.astro";
     <!-- Page Header -->
     <section class="about-header" id="about-title-sec">
       <div class="header-line" id="about-line-div"></div>
-      <span class="system-code">Interdisciplinary artist — Cluj-Napoca, RO</span>
+      <span class="system-code">Interdisciplinary artist — Cluj-Napoca, RO · Chișinău, MD</span>
       <h1 class="page-title cursor" id="about-page-title">About</h1>
     </section>
 
@@ -21,10 +21,17 @@ import Layout from "../layouts/Layout.astro";
         <h2 class="section-title">01. Practice</h2>
         <div class="bio-text">
           <p>
-            I'm an interdisciplinary artist and visual designer based in Cluj-Napoca, Romania. I
-            work with the parts of digital life most people never see, like platforms, algorithms,
-            and the data moving underneath them, and I turn them into things you can look at and
-            interact with.
+            I'm an interdisciplinary artist and visual designer based in Cluj-Napoca, Romania,
+            originally from Chișinău, Moldova. I work with the parts of digital life most people
+            never see, like platforms, algorithms, and the data moving underneath them, and I turn
+            them into things you can look at and interact with.
+          </p>
+          <p>
+            I came to installation the long way round. I started out in photography and video,
+            worked on organising festivals, contributed static installations, and ran live VJ
+            projections at events across Cluj-Napoca and Chișinău. Over the last couple of years I
+            moved toward interactive work, which is what pushed me into the Master's in Digital
+            Interactive Arts.
           </p>
           <p>
             I don't think of a medium as a fixed category. My process is rooted in play and inquiry:
@@ -76,9 +83,100 @@ import Layout from "../layouts/Layout.astro";
           </div>
         </section>
 
-        <!-- Exhibition Archives -->
+        <!-- Exhibitions & selected projects (artist CV) -->
         <section class="exhibitions-section">
-          <h2 class="section-title">03. Experience & education</h2>
+          <h2 class="section-title">03. Exhibitions & selected projects</h2>
+          <div class="log-timeline">
+            <div class="log-item">
+              <div class="log-meta">
+                <span class="log-date">[2026]</span>
+                <span class="log-loc">Cluj-Napoca, RO</span>
+              </div>
+              <div class="log-details">
+                <span class="log-project">(in)between.wav — Exhibited</span>
+                <p class="log-desc">
+                  Interactive light installation. Exhibited at the Ethnographical Museum of
+                  Transylvania. Master of Digital Interactive Arts (UBB), coordinated by Prof.
+                  Cristina Pop-Tiron.
+                </p>
+              </div>
+            </div>
+
+            <div class="log-item">
+              <div class="log-meta">
+                <span class="log-date">[2026]</span>
+                <span class="log-loc">Cluj-Napoca, RO</span>
+              </div>
+              <div class="log-details">
+                <span class="log-project">IcarusSyn .01 — In production</span>
+                <p class="log-desc">
+                  Interactive generative LED sphere, developed thanks to a UBB cultural-artistic
+                  scholarship awarded to produce it. In production toward a public exhibition.
+                </p>
+              </div>
+            </div>
+
+            <div class="log-item">
+              <div class="log-meta">
+                <span class="log-date">[2025]</span>
+                <span class="log-loc">Cluj-Napoca, RO</span>
+              </div>
+              <div class="log-details">
+                <span class="log-project">Oracolul2000 — Collaboration</span>
+                <p class="log-desc">
+                  Environmental LED installation for a project signed by Călin Nahaiciuc, shown in a
+                  gallery space in Cluj-Napoca.
+                </p>
+              </div>
+            </div>
+
+            <div class="log-item">
+              <div class="log-meta">
+                <span class="log-date">[2025]</span>
+                <span class="log-loc">Cluj-Napoca, RO</span>
+              </div>
+              <div class="log-details">
+                <span class="log-project">AR Installation — Reactor</span>
+                <p class="log-desc">
+                  Co-created an Augmented Reality installation at Reactor de Creație și Experiment,
+                  exploring participative experiences in urban public space.
+                </p>
+              </div>
+            </div>
+
+            <div class="log-item">
+              <div class="log-meta">
+                <span class="log-date">[2025]</span>
+                <span class="log-loc">UBB FTF</span>
+              </div>
+              <div class="log-details">
+                <span class="log-project">Rooted Structures / Bio-Sonic Dust</span>
+                <p class="log-desc">
+                  Interactive performance and audio-visual experiments developed within the Master
+                  of Digital Interactive Arts (UBB).
+                </p>
+              </div>
+            </div>
+
+            <div class="log-item">
+              <div class="log-meta">
+                <span class="log-date">[2014 — present]</span>
+                <span class="log-loc">Cluj-Napoca · Chișinău</span>
+              </div>
+              <div class="log-details">
+                <span class="log-project">Earlier practice</span>
+                <p class="log-desc">
+                  Photography and video, static installations and live VJ projections at festivals
+                  and events, across Cluj-Napoca and Chișinău.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Experience & education -->
+        <section class="exhibitions-section">
+          <h2 class="section-title">04. Experience & education</h2>
           <div class="log-timeline">
             <div class="log-item">
               <div class="log-meta">
@@ -343,6 +441,10 @@ import Layout from "../layouts/Layout.astro";
     left: 0;
     color: var(--color-accent);
     opacity: 0.7;
+  }
+
+  .exhibitions-section + .exhibitions-section {
+    margin-top: 3rem;
   }
 
   /* Archival log / Timeline */

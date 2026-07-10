@@ -103,6 +103,14 @@ const ogImage = [d.thumbnailUrl, ...(d.mediaGallery ?? [])].find((u) =>
               {d.status}
             </dd>
           </div>
+          {
+            d.dimensions && (
+              <div class="spec-row">
+                <dt>Dimensions</dt>
+                <dd data-edit-field="dimensions">{d.dimensions}</dd>
+              </div>
+            )
+          }
           <div class="spec-row">
             <dt>Software</dt>
             <dd class="tags">
