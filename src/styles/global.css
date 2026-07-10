@@ -10,7 +10,7 @@
   --color-accent-glow: #a98fdb;
   --color-accent-dark: #322a4d;
   --color-text: #ededed;
-  --color-muted: #888888;
+  --color-muted: #959595;
   --color-muted-lavender: #b4b4b4;
   --color-border: #262626;
   --color-border-glow: #3a3a3a;
@@ -58,7 +58,7 @@
   --color-accent-glow: #4a3578;
   --color-accent-dark: #d9cfe8;
   --color-text: #14130f;
-  --color-muted: #6a675f;
+  --color-muted: #595750;
   --color-muted-lavender: #3a382f;
   --color-border: #c7c2b5;
   --color-border-glow: #b0aa9b;
@@ -210,7 +210,7 @@ li {
   font-family: var(--font-body);
   font-size: 0.95rem;
   line-height: 1.65;
-  color: var(--color-muted);
+  color: var(--color-muted-lavender);
   transition: color 0.4s ease;
 }
 
@@ -464,7 +464,7 @@ a {
 /* While the fullscreen media viewer is open, hide the page chrome so it can't
    paint over the viewer (the lightbox lives inside a stacking context). */
 body.lightbox-open .system-header,
-body.lightbox-open .system-status-bar {
+body.lightbox-open .system-footer {
   display: none;
 }
 

@@ -51,7 +51,8 @@ function brief(text: string, max = 110) {
     <section class="windex">
       <div class="windex-head reveal">
         <h2 class="windex-label">Interactive Installations</h2>
-        <span class="windex-count">[{String(interactiveProjects.length + 1).padStart(2, "0")}]</span>
+        <span class="windex-count">[{String(interactiveProjects.length + 1).padStart(2, "0")}]</span
+        >
       </div>
       <div class="windex-list">
         {
@@ -411,9 +412,6 @@ function brief(text: string, max = 110) {
     }
     .wr-arrow {
       display: none;
-    }
-    .lead-foot {
-      gap: 1.5rem;
     }
     /* No hover on touch — reveal the project brief inline instead. */
     .wr-brief {

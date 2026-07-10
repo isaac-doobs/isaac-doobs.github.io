@@ -91,26 +91,6 @@ const personLd = {
 
     <!-- (theme glitch overlay removed) -->
 
-    <!-- System Shutter Boot Loader -->
-    <div id="loader-overlay" class="loader-overlay" style="display: none;">
-      <!-- Inline blocking script to prevent FOUC / loader flash on subsequent navigation -->
-      <script is:inline>
-        if (sessionStorage.getItem("system-booted") !== "true") {
-          document.getElementById("loader-overlay").style.display = "flex";
-        }
-      </script>
-
-      <div class="loader-shutter top"></div>
-      <div class="loader-shutter bottom"></div>
-
-      <div class="loader-content" id="loader-content">
-        <span class="loader-brand">CRISTIAN DUBINEANSCHI</span>
-        <span class="loader-sub font-mono">New Media Artist</span>
-        <div class="loader-line"><div class="loader-line-fill" id="progress-fill"></div></div>
-        <span class="loader-pct font-mono"><span id="progress-percent">00</span>%</span>
-      </div>
-    </div>
-
     <!-- System Header / Terminal Status -->
     <header class="system-header" id="main-header" transition:persist>
       <div class="header-container">
@@ -132,31 +112,20 @@ const personLd = {
       <slot />
     </main>
 
-    <!-- Fixed Technical Status Bar (Mockup bottom HUD) -->
-    <div class="system-status-bar" id="status-bar-daemon">
-      <div class="status-bar-container">
-        <div class="status-left font-mono">
-          <span class="status-light-pulse"></span>
-          © 2026 CRISTIAN DUBINEANSCHI — AVAILABLE FOR SELECTED WORK <span class="blink-cursor"
-            >▋</span
-          >
+    <!-- Minimal Gallery Footer -->
+    <footer class="system-footer" id="main-footer" transition:persist>
+      <div class="footer-container">
+        <div class="footer-left font-mono">
+          © 2026 CRISTIAN DUBINEANSCHI · AVAILABLE FOR COMMISSIONS & EXHIBITIONS
         </div>
-        <div class="status-right font-mono">
-          <div class="osc-container-new">
-            <span class="meta-label">SYS_MON:</span>
-            <canvas id="osc-canvas" width="60" height="15"></canvas>
-          </div>
-          <span class="divider">|</span>
-          <span class="meta-label">LOC:</span>
-          <span class="meta-val">46.77° N, 23.59° E</span>
-          <span class="divider">|</span>
+        <div class="footer-right font-mono">
           <button id="theme-toggle" class="theme-toggle-btn" aria-label="Toggle theme">
             <span class="toggle-indicator-light"></span>
             <span id="theme-btn-text">DARK</span>
           </button>
         </div>
       </div>
-    </div>
+    </footer>
 
     <script>
       function applyTheme() {
@@ -181,89 +150,6 @@ const personLd = {
           localStorage.setItem("system-theme", nextTheme);
           applyTheme();
         });
-      }
-
-      function setupOscilloscope() {
-        const canvas = document.getElementById("osc-canvas") as HTMLCanvasElement;
-        if (!canvas) return;
-        const ctx = canvas.getContext("2d");
-        if (!ctx) return;
-
-        let animationId: number;
-        let phase = 0;
-        const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-
-        function draw() {
-          if (!ctx || !canvas) return;
-          ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-          const theme = document.documentElement.getAttribute("data-theme") || "dark";
-          ctx.strokeStyle = theme === "dark" ? "#a98fdb" : "#5f4a93";
-          ctx.lineWidth = 1.5;
-          ctx.beginPath();
-
-          for (let x = 0; x < canvas.width; x++) {
-            const angle = (x / canvas.width) * Math.PI * 4 + phase;
-            // Skip per-frame random jitter when motion is reduced.
-            const noise = reduceMotion ? 0 : (Math.random() - 0.5) * 1.5 * Math.sin(phase * 1.5);
-            const y = canvas.height / 2 + Math.sin(angle) * 4 + noise;
-
-            if (x === 0) {
-              ctx.moveTo(x, y);
-            } else {
-              ctx.lineTo(x, y);
-            }
-          }
-
-          ctx.stroke();
-
-          // Reduced motion: draw a single static waveform and stop.
-          if (reduceMotion) return;
-
-          phase += 0.08;
-          animationId = requestAnimationFrame(draw);
-        }
-
-        draw();
-
-        // Clean up animation on swap to avoid leaks
-        document.addEventListener(
-          "astro:before-swap",
-          () => {
-            cancelAnimationFrame(animationId);
-          },
-          { once: true },
-        );
-      }
-
-      function setupBootLoader() {
-        const overlay = document.getElementById("loader-overlay");
-        const progressFill = document.getElementById("progress-fill");
-        const progressPercent = document.getElementById("progress-percent");
-
-        if (!overlay || !progressFill || !progressPercent) return;
-
-        // If already booted in this browser session, skip animation
-        if (sessionStorage.getItem("system-booted") === "true") {
-          overlay.classList.add("hidden-loader");
-          return;
-        }
-
-        let progress = 0;
-        const progressInterval = setInterval(() => {
-          progress += Math.floor(Math.random() * 9) + 4;
-          if (progress >= 100) {
-            progress = 100;
-            clearInterval(progressInterval);
-            setTimeout(() => {
-              overlay.classList.add("reveal");
-              sessionStorage.setItem("system-booted", "true");
-              setTimeout(() => overlay.classList.add("hidden-loader"), 850);
-            }, 250);
-          }
-          progressFill.style.width = `${progress}%`;
-          progressPercent.textContent = String(progress).padStart(2, "0");
-        }, 60);
       }
 
       // Active link highlight script
@@ -499,8 +385,6 @@ const personLd = {
       function init() {
         applyTheme();
         setupThemeToggle();
-        setupOscilloscope();
-        setupBootLoader();
         setupActiveNav();
         setupGridDots();
         setupReveal();
@@ -661,72 +545,43 @@ const personLd = {
         );
       }
 
-      /* Sticky HUD status bar at bottom */
-      .system-status-bar {
-        position: fixed;
-        bottom: 0;
-        left: 0;
+      /* Minimal Gallery Footer */
+      .system-footer {
         width: 100%;
-        background-color: var(--color-status-bg);
+        background-color: var(--color-bg);
         border-top: 1px solid var(--color-border);
-        padding: 0.5rem 0;
-        z-index: 1000;
-        box-shadow: 0 -5px 20px rgba(0, 0, 0, 0.3);
+        padding: 2.5rem 0;
+        margin-top: 5rem;
+        position: relative;
+        z-index: 10;
         transition:
           background-color 0.4s ease,
           border-top-color 0.4s ease;
       }
-      .status-bar-container {
+      .footer-container {
         margin: 0 auto;
         padding: 0 2.5rem;
         display: flex;
         justify-content: space-between;
         align-items: center;
       }
-      .status-left,
-      .status-right {
-        font-size: 0.65rem;
+      .footer-left {
+        font-size: 0.68rem;
         color: var(--color-muted);
+        letter-spacing: 0.08em;
+      }
+      .footer-right {
         display: flex;
         align-items: center;
-        gap: 10px;
-      }
-      .status-light-pulse {
-        width: 5px;
-        height: 5px;
-        border-radius: 50%;
-        background-color: var(--color-accent);
-        box-shadow: 0 0 6px var(--color-accent);
-        animation: status-glow 1s infinite alternate;
-      }
-      @keyframes status-glow {
-        0% {
-          opacity: 0.5;
-        }
-        100% {
-          opacity: 1;
-        }
-      }
-      .osc-container-new {
-        display: flex;
-        align-items: center;
-        gap: 6px;
-      }
-      #osc-canvas {
-        vertical-align: middle;
-        opacity: 0.85;
-      }
-      .divider {
-        color: var(--color-border);
-      }
-      /* Compact the theme toggle so it sits flush in the status bar height */
-      .system-status-bar .theme-toggle-btn {
-        padding: 0.2rem 0.55rem;
-        font-size: 0.65rem;
       }
 
       body {
-        padding-bottom: 3.5rem; /* Space so content is not hidden by the status bar */
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+      }
+      #main-content {
+        flex: 1 0 auto;
       }
 
       @media (max-width: 768px) {
@@ -736,18 +591,13 @@ const personLd = {
         .header-container {
           padding: 0 1rem;
         }
-        .status-bar-container {
+        .footer-container {
           padding: 0 1rem;
-        }
-        /* Keep the theme toggle reachable on mobile; hide only the HUD readouts. */
-        .status-right .osc-container-new,
-        .status-right .divider,
-        .status-right .meta-label,
-        .status-right .meta-val {
-          display: none;
+          flex-direction: column;
+          gap: 1.25rem;
+          text-align: center;
         }
       }
-
     </style>
   </body>
 </html>

@@ -49,7 +49,7 @@ validated against `src/content.config.ts`:
 ```yaml
 ---
 title: "Project Name"
-category: "Interactive"          # "Interactive" or "Design"
+category: "Interactive" # "Interactive" or "Design"
 year: 2026
 status: "Exhibited"
 medium: ["Light Installation", "Sound"]
@@ -57,7 +57,7 @@ concept: "A paragraph framing the work, its idea, and the space it occupies."
 software: ["TouchDesigner"]
 hardware: ["ESP32", "Addressable LEDs"]
 inputs: ["Two voice signals"]
-videoUrl: "/assets/projects/<slug>_01.jpg"      # image, or .mp4 for video
+videoUrl: "/assets/projects/<slug>_01.jpg" # image, or .mp4 for video
 thumbnailUrl: "/assets/projects/<slug>_01.jpg"
 
 # optional
@@ -69,7 +69,6 @@ mediaGallery: ["/assets/projects/<slug>_02.jpg", "/assets/projects/<slug>_03.jpg
 blueprintUrl: "/assets/<slug>_blueprint.jpg"
 blueprintCaption: "Spatial layout and sensor mapping."
 ---
-
 Anything below the frontmatter renders as the project's detailed narrative.
 ```
 

@@ -16,79 +16,71 @@ import Layout from "../layouts/Layout.astro";
 
     <!-- Two Column Data Grid -->
     <div class="contact-grid" id="contact-grid-content">
-      <!-- Left Column: Interactive Signal Terminal Form -->
+      <!-- Left Column: Editorial Contact Form -->
       <div class="contact-left" id="contact-form-column">
         <h2 class="section-title">01. Send a message</h2>
-        <div class="terminal-form-box glow-border">
-          <div class="terminal-form-header">
-            <span class="form-dot red"></span>
-            <span class="form-dot yellow"></span>
-            <span class="form-dot green"></span>
-            <span class="form-title">new-message</span>
-          </div>
-          <form class="terminal-form" id="signal-form">
-            <div class="form-field">
-              <label for="sender-name" class="font-mono">Name</label>
-              <input
-                type="text"
-                id="sender-name"
-                name="name"
-                required
-                placeholder="Your name"
-                class="form-input font-mono"
-              />
-            </div>
-
-            <div class="form-field">
-              <label for="sender-email" class="font-mono">Email</label>
-              <input
-                type="email"
-                id="sender-email"
-                name="email"
-                required
-                placeholder="you@example.com"
-                class="form-input font-mono"
-              />
-            </div>
-
-            <div class="form-field">
-              <label for="sender-message" class="font-mono">Message</label>
-              <textarea
-                id="sender-message"
-                name="message"
-                rows="6"
-                required
-                placeholder="Tell me about your project…"
-                class="form-textarea font-mono"></textarea>
-            </div>
-
-            <!-- Honeypot: hidden from people; bots that fill it are dropped. -->
+        <form class="editorial-form" id="signal-form">
+          <div class="form-field">
+            <label for="sender-name" class="font-mono">Name</label>
             <input
               type="text"
-              name="botcheck"
-              id="botcheck"
-              class="hp-field"
-              tabindex="-1"
-              autocomplete="off"
-              aria-hidden="true"
+              id="sender-name"
+              name="name"
+              required
+              placeholder="Your name"
+              class="form-input"
             />
-
-            <button type="submit" class="submit-btn font-mono" id="form-submit-btn">
-              <span>Send message</span>
-            </button>
-          </form>
-          <div
-            id="form-status-log"
-            class="form-status-log font-mono"
-            style="display: none;"
-            role="status"
-            aria-live="polite"
-          >
           </div>
+
+          <div class="form-field">
+            <label for="sender-email" class="font-mono">Email</label>
+            <input
+              type="email"
+              id="sender-email"
+              name="email"
+              required
+              placeholder="you@example.com"
+              class="form-input"
+            />
+          </div>
+
+          <div class="form-field">
+            <label for="sender-message" class="font-mono">Message</label>
+            <textarea
+              id="sender-message"
+              name="message"
+              rows="6"
+              required
+              placeholder="Tell me about your project or exhibition proposal…"
+              class="form-textarea"></textarea>
+          </div>
+
+          <!-- Honeypot: hidden from people; bots that fill it are dropped. -->
+          <input
+            type="text"
+            name="botcheck"
+            id="botcheck"
+            class="hp-field"
+            tabindex="-1"
+            autocomplete="off"
+            aria-hidden="true"
+          />
+
+          <button type="submit" class="submit-btn" id="form-submit-btn">
+            <span>Send message</span>
+          </button>
+        </form>
+        <div
+          id="form-status-log"
+          class="form-status-msg font-mono"
+          style="display: none;"
+          role="status"
+          aria-live="polite"
+        >
         </div>
       </div>
 
-      <!-- Right Column: System Comm Channels & Terminal Outputs -->
+      <!-- Right Column: Details -->
       <div class="contact-right" id="contact-channels-column">
         <h2 class="section-title">02. Details</h2>
 
@@ -112,22 +104,11 @@ import Layout from "../layouts/Layout.astro";
           </div>
         </div>
 
-        <div class="code-terminal" id="contact-diag-term">
-          <div class="terminal-header">
-            <div class="terminal-buttons">
-              <span class="terminal-dot red"></span>
-              <span class="terminal-dot yellow"></span>
-              <span class="terminal-dot green"></span>
-            </div>
-            <span class="terminal-title">status</span>
-          </div>
-          <div class="terminal-body font-mono text-glow">
-            <div class="diag-line">Available for selected work</div>
-            <div class="diag-line">Replies within ~48 hours</div>
-            <div class="diag-line">Based in Cluj-Napoca, RO · Chișinău, MD (UTC+2)</div>
-            <div class="diag-line">Email open</div>
-            <div class="diag-line blink-cursor">▋</div>
-          </div>
+        <div class="contact-notice reveal">
+          <p class="notice-text">
+            Available for selected new-media commissions, interactive light/sound installations, and
+            visual system consulting. Typically responds within 48 hours.
+          </p>
         </div>
       </div>
     </div>
@@ -234,197 +215,157 @@ import Layout from "../layouts/Layout.astro";
     margin-bottom: 3rem;
   }
   .header-line {
-    height: 2px;
-    background: linear-gradient(to right, var(--color-accent), transparent);
-    margin-bottom: 1rem;
+    height: 1px;
+    background: linear-gradient(to right, var(--color-border), transparent);
+    margin-bottom: 1.5rem;
   }
   .system-code {
     font-family: var(--font-mono);
-    font-size: 0.76rem;
+    font-size: 0.72rem;
     color: var(--color-accent);
-    letter-spacing: 0.1em;
+    letter-spacing: 0.08em;
   }
   .page-title {
-    font-size: clamp(1.9rem, 4vw, 3rem);
+    font-size: clamp(2rem, 5vw, 3.4rem);
     font-weight: 400;
     margin-top: 0.5rem;
     letter-spacing: -0.03em;
     line-height: 1;
-    text-transform: none;
+    text-transform: uppercase;
   }
 
   /* Layout Grid */
   .contact-grid {
     display: grid;
-    grid-template-columns: 1.25fr 1.1fr;
-    gap: 4rem;
+    grid-template-columns: 1.2fr 1fr;
+    gap: 5rem;
   }
 
   .section-title {
     font-family: var(--font-sans);
-    font-size: 0.95rem;
-    font-weight: 800;
+    font-size: 0.85rem;
+    font-weight: 700;
     color: var(--color-text);
     border-bottom: 1px solid var(--color-border);
     padding-bottom: 0.75rem;
-    margin-bottom: 1.5rem;
-    letter-spacing: 0.05em;
+    margin-bottom: 2rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
   }
 
-  /* Terminal Form styling */
-  .terminal-form-box {
-    border: 1px solid var(--color-terminal-border);
-    background-color: var(--color-terminal-bg);
-    border-radius: 4px;
-    overflow: hidden;
-    transition: border-color 0.3s ease;
-  }
-  .terminal-form-box:hover {
-    border-color: rgba(139, 111, 196, 0.3);
-  }
-  .terminal-form-header {
-    background-color: var(--color-terminal-hdr);
-    padding: 0.75rem 1rem;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    border-bottom: 1px solid var(--color-terminal-border);
-  }
-  .form-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background-color: var(--color-terminal-border);
-  }
-  .form-dot.red {
-    background-color: #ef4444;
-  }
-  .form-dot.yellow {
-    background-color: #eab308;
-  }
-  .form-dot.green {
-    background-color: #22c55e;
-  }
-  .form-title {
-    font-family: var(--font-mono);
-    font-size: 0.72rem;
-    color: var(--color-terminal-muted);
-    margin-left: 8px;
-    letter-spacing: 0.05em;
-  }
-  .terminal-form {
-    padding: 1.5rem;
+  /* Editorial Form styling */
+  .editorial-form {
     display: flex;
     flex-direction: column;
-    gap: 1.25rem;
+    gap: 2rem;
   }
   .form-field {
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: 8px;
   }
   .form-field label {
-    font-size: 0.76rem;
-    color: var(--color-terminal-accent);
-    letter-spacing: 0.05em;
+    font-size: 0.72rem;
+    color: var(--color-muted);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
   }
   .form-input,
   .form-textarea {
-    background-color: rgba(255, 255, 255, 0.03);
-    border: 1px solid var(--color-terminal-border);
-    color: var(--color-terminal-text);
-    padding: 0.75rem;
-    border-radius: 4px;
-    font-size: 0.82rem;
+    background-color: transparent;
+    border: none;
+    border-bottom: 1px solid var(--color-border);
+    color: var(--color-text);
+    padding: 0.5rem 0;
+    font-size: 0.9rem;
     outline: none;
-    transition:
-      border-color 0.3s ease,
-      box-shadow 0.3s ease;
+    border-radius: 0;
+    transition: border-color 0.3s var(--ease-out-expo);
   }
   .form-input::placeholder,
   .form-textarea::placeholder {
-    color: var(--color-terminal-muted);
-    opacity: 0.5;
+    color: var(--color-muted);
+    opacity: 0.35;
   }
   .form-input:focus,
   .form-textarea:focus {
-    border-color: var(--color-terminal-accent);
-    box-shadow: 0 0 10px rgba(139, 111, 196, 0.15);
+    border-color: var(--color-accent);
   }
   .submit-btn {
+    align-self: flex-start;
     background: none;
-    border: 1px solid var(--color-terminal-accent);
-    color: var(--color-terminal-accent);
-    padding: 0.75rem 1.5rem;
-    border-radius: 4px;
+    border: 1px solid var(--color-border);
+    color: var(--color-text);
+    padding: 0.8rem 2rem;
+    border-radius: 0;
     cursor: pointer;
-    font-size: 0.82rem;
+    font-size: 0.76rem;
     font-weight: 700;
-    letter-spacing: 0.05em;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-    margin-top: 0.5rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    transition: all 0.3s var(--ease-out-expo);
+    margin-top: 1rem;
   }
   .submit-btn:hover {
-    background-color: var(--color-terminal-accent);
-    color: #000000;
-    border-color: var(--color-terminal-accent);
-    box-shadow: 0 0 15px rgba(139, 111, 196, 0.35);
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+    background-color: var(--color-accent-dark);
   }
   .submit-btn:disabled {
     opacity: 0.5;
     cursor: not-allowed;
-    border-color: var(--color-terminal-border);
-    color: var(--color-terminal-muted);
+    border-color: var(--color-border);
+    color: var(--color-muted);
   }
 
-  /* Status log */
-  .form-status-log {
-    padding: 0 1.5rem 1.5rem 1.5rem;
+  /* Inline status messages */
+  .form-status-msg {
+    margin-top: 1.5rem;
+    font-size: 0.76rem;
+    line-height: 1.5;
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: 4px;
   }
-  .status-line {
-    font-size: 0.76rem;
-    line-height: 1.4;
+  .form-status-msg :global(.status-line) {
+    padding: 0.5rem 0;
   }
-  .status-line.info {
-    color: var(--color-terminal-muted);
+  .form-status-msg :global(.status-line.info) {
+    color: var(--color-muted);
   }
-  .status-line.success {
-    color: var(--color-terminal-success);
+  .form-status-msg :global(.status-line.success) {
+    color: var(--color-accent);
     font-weight: 700;
   }
-  .status-line.error {
-    color: #f87171;
+  .form-status-msg :global(.status-line.error) {
+    color: var(--color-error);
     font-weight: 700;
   }
 
-  /* Honeypot — visually and from-flow hidden, but present for bots to fill. */
+  /* Honeypot hidden from layout flow */
   .hp-field {
     display: none;
   }
 
-  /* Right Column details */
+  /* Right Column Details */
   .technical-parameters {
     border: 1px solid var(--color-border);
     background-color: var(--color-card-bg);
-    padding: 1.5rem;
-    border-radius: 4px;
+    padding: 2rem;
+    border-radius: 0;
     margin-bottom: 2rem;
     transition:
       background-color 0.4s ease,
       border-color 0.4s ease;
   }
   .subsection-title {
-    font-family: var(--font-mono);
-    font-size: 0.82rem;
+    font-family: var(--font-sans);
+    font-size: 0.76rem;
     color: var(--color-accent);
-    margin-bottom: 1rem;
-    letter-spacing: 0.05em;
+    margin-bottom: 1.5rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-weight: 700;
   }
   .param-row {
     display: flex;
@@ -438,13 +379,13 @@ import Layout from "../layouts/Layout.astro";
   }
   .param-name {
     font-family: var(--font-mono);
-    font-size: 0.82rem;
+    font-size: 0.76rem;
     color: var(--color-muted);
     font-weight: 500;
   }
   .param-val {
     font-family: var(--font-mono);
-    font-size: 0.82rem;
+    font-size: 0.76rem;
     color: var(--color-text);
     text-align: right;
   }
@@ -454,93 +395,29 @@ import Layout from "../layouts/Layout.astro";
   }
   .tech-link:hover {
     text-decoration: underline;
-    text-shadow: var(--color-nav-glow);
-  }
-  .pgp-key {
-    letter-spacing: 0.05em;
-    font-size: 0.72rem;
-    color: var(--color-muted-lavender);
   }
 
-  .diag-line {
-    font-size: 0.82rem;
+  .contact-notice {
+    padding: 1.5rem;
+    border-left: 2px solid var(--color-accent);
+    background-color: var(--color-bg-soft);
+  }
+  .notice-text {
+    font-size: 0.85rem;
     line-height: 1.6;
-    color: var(--color-terminal-text);
+    color: var(--color-muted);
   }
 
   /* Responsive Design */
   @media (max-width: 1024px) {
     .contact-grid {
       grid-template-columns: 1fr;
-      gap: 3rem;
+      gap: 4rem;
     }
   }
   @media (max-width: 768px) {
     .contact-container {
       padding-top: 1.5rem;
     }
-  }
-
-  /* Light theme — the message form and status box are decorative "terminals",
-     not code, so adapt them to the light palette instead of staying dark.
-     (Dark theme keeps the original terminal look untouched.) */
-  :root[data-theme="light"] .terminal-form-box,
-  :root[data-theme="light"] #contact-diag-term {
-    background-color: var(--color-card-bg);
-    border-color: var(--color-border);
-  }
-  :root[data-theme="light"] .terminal-form-box:hover {
-    border-color: rgba(95, 74, 147, 0.35);
-  }
-  :root[data-theme="light"] .terminal-form-header,
-  :root[data-theme="light"] #contact-diag-term .terminal-header {
-    background-color: var(--color-bg-soft);
-    border-bottom-color: var(--color-border);
-  }
-  :root[data-theme="light"] .form-title,
-  :root[data-theme="light"] #contact-diag-term .terminal-title {
-    color: var(--color-muted);
-  }
-  :root[data-theme="light"] .form-field label {
-    color: var(--color-accent);
-  }
-  :root[data-theme="light"] .form-input,
-  :root[data-theme="light"] .form-textarea {
-    background-color: rgba(20, 19, 15, 0.03);
-    border-color: var(--color-border);
-    color: var(--color-text);
-  }
-  :root[data-theme="light"] .form-input::placeholder,
-  :root[data-theme="light"] .form-textarea::placeholder {
-    color: var(--color-muted);
-  }
-  :root[data-theme="light"] .form-input:focus,
-  :root[data-theme="light"] .form-textarea:focus {
-    border-color: var(--color-accent);
-    box-shadow: 0 0 10px rgba(95, 74, 147, 0.15);
-  }
-  :root[data-theme="light"] .submit-btn {
-    border-color: var(--color-accent);
-    color: var(--color-accent);
-  }
-  :root[data-theme="light"] .submit-btn:hover {
-    background-color: var(--color-accent);
-    color: var(--color-bg);
-  }
-  :root[data-theme="light"] .status-line.info {
-    color: var(--color-muted);
-  }
-  :root[data-theme="light"] .status-line.success {
-    color: var(--color-accent);
-  }
-  :root[data-theme="light"] .status-line.error {
-    color: #c0392b;
-  }
-  :root[data-theme="light"] #contact-diag-term .terminal-body {
-    background-color: var(--color-card-bg);
-  }
-  :root[data-theme="light"] #contact-diag-term .diag-line,
-  :root[data-theme="light"] #contact-diag-term .blink-cursor {
-    color: var(--color-text);
   }
 </style>
